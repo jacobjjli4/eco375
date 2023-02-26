@@ -3,61 +3,40 @@
        log:  C:/Users/lijia/OneDrive - University of Toronto/Documents
 > /School/1-5 ECO375/ECO375 Project//3 - Output/jacob_test_log.log
   log type:  text
- opened on:  26 Feb 2023, 11:15:55
+ opened on:  26 Feb 2023, 12:47:38
 
 . 
-end of do-file
-
-. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
-
-. shp2dta using Tracts_2020_HOLC, database(usdb) coordinates(uscoord) 
-> genid(id)
-type: 5
-
-. 
-end of do-file
-
-. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
-
-. shp2dta using Tracts_2020_HOLC, database(Tracats_2020_HOLC) coordina
-> tes(Tracts_2020_HOLC_coord) genid(id)
-type: 5
-
-. 
-end of do-file
-
-. help shp2dta
-
-. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
-
-. shp2dta using Tracts_2020_HOLC, database(Tracts_2020_HOLC) coordinat
-> es(Tracts_2020_HOLC_coord) genid(id)
-type: 5
-file Tracts_2020_HOLC_coord.dta already exists
-r(602);
-
-end of do-file
-
-r(602);
-
-. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
-
-. shp2dta using Tracts_2020_HOLC, database(Tracts_2020_HOLC) coordinat
-> es(Tracts_2020_HOLC_coord) genid(id)
-type: 5
-
-. 
-end of do-file
-
-. use Tracts_2020_HOLC.dta
-
-. help shp2dta
-
-. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
-
+. * convert shapefile of HOLC to census tract crosswalk into dta forma
+> t
 . shp2dta using Tracts_2020_HOLC, database(Tracts_2020_HOLC) ///
 >         coordinates(Tracts_2020_HOLC_coord) genid(id) replace
 type: 5
+
+. 
+. * load dta created above
+. use Tracts_2020_HOLC.dta
+
+. 
+. * clean data
+. gen tract_code1 = substr(GISJOIN, 2, 2)
+
+. gen tract_code2 = substr(GISJOIN, 5, 3)
+
+. gen tract_code3 = substr(GISJOIN, 9, 6)
+
+. egen tract_code = concat(tract_code*)
+
+. drop tract_code1-tract_code3
+
+. 
+end of do-file
+
+. br
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. save Tracts_2020_HOLC_cleaned
+file Tracts_2020_HOLC_cleaned.dta saved
 
 . 
 end of do-file
@@ -67,6 +46,434 @@ end of do-file
 . cd "$INPUT_PATH/Voting_census_block"
 C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 E
 > CO375\ECO375 Project\1 - Data\Voting_census_block
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. clear all
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. import delimited "2021blockgroupvoting.csv"
+(encoding automatically selected: ISO-8859-1)
+(9 vars, 233,866 obs)
+
+. 
+end of do-file
+
+. br
+
+. br
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. gen tract_code = substr(blockgroup_geoid, 0, 10)
+type mismatch
+r(109);
+
+end of do-file
+
+r(109);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. gen tract_code = floor(blockgroup_geoid / 10)
+
+. 
+end of do-file
+
+. tract_code
+command tract_code is unrecognized
+r(199);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. egen tract_dem_total = total(dem), by(tract_code)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. egen tract_rep_total = total(rep), by(tract_code)
+
+. 
+end of do-file
+
+. help duplicate
+
+. duplicates drop tract_code
+force option required with duplicates drop varlist
+r(198);
+
+. duplicates drop tract_code force
+variable force not found
+r(111);
+
+. duplicates drop tract_code, force
+
+Duplicates in terms of tract_code
+
+(225,189 observations deleted)
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. duplicates drop tract_code, force
+
+Duplicates in terms of tract_code
+
+(0 observations are duplicates)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. clear all
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. import delimited "2021blockgroupvoting.csv"
+(encoding automatically selected: ISO-8859-1)
+(9 vars, 233,866 obs)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. gen tract_code = floor(blockgroup_geoid / 10)
+
+. egen tract_dem_total = total(dem), by(tract_code)
+
+. egen tract_rep_total = total(rep), by(tract_code)
+
+. egen tract_lib_total = total(lib), by(tract_code)
+
+. egen tract_oth_total = total(oth), by(tract_code)
+
+. duplicates drop tract_code, force
+
+Duplicates in terms of tract_code
+
+(225,189 observations deleted)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. cd "$INPUT_PATH/Voting_census_block"
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 E
+> CO375\ECO375 Project\1 - Data\Voting_census_block
+
+. clear all
+
+. import delimited "2021blockgroupvoting.csv"
+(encoding automatically selected: ISO-8859-1)
+(9 vars, 233,866 obs)
+
+. 
+end of do-file
+
+. br
+
+. br
+
+. help tostring
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. tostring blockgroup_geoid replace
+variable replace not found
+r(111);
+
+end of do-file
+
+r(111);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. tostring blockgroup_geoid, replace
+blockgroup_geoid cannot be converted reversibly; no replace
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. tostring blockgroup_geoid
+must specify either generate or replace option
+r(198);
+
+end of do-file
+
+r(198);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. tostring blockgroup_geoid, replace
+blockgroup_geoid cannot be converted reversibly; no replace
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. tostring blockgroup_geoid, generate
+option generate incorrectly specified
+r(198);
+
+end of do-file
+
+r(198);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. tostring blockgroup_geoid generate(blockgroup_geoid_str)
+factor-variable and time-series operators not allowed
+r(101);
+
+end of do-file
+
+r(101);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. tostring blockgroup_geoid, generate(blockgroup_geoid_str)
+blockgroup_geoid cannot be converted reversibly; no generate
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. tostring blockgroup_geoid, replace format("%14.0f")
+blockgroup_geoid was double now str12
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. egen concat("0" blockgroup_geoid) if strlen(blockgroup_geoid) == 11
+invalid syntax
+r(198);
+
+end of do-file
+
+r(198);
+
+. help egen
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. gen "0"
+"0 invalid name
+r(198);
+
+end of do-file
+
+r(198);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. gen 0
+0 invalid name
+r(198);
+
+end of do-file
+
+r(198);
+
+. help gen
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. replace blockgroup_geoid = "0" + blockgroup_geoid if strlen(blockgro
+> up_geoid)==11
+(43,877 real changes made)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. replace blockgroup_geoid = substr(blockgroup_geoid, 1, 11)
+(233,866 real changes made)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. replace blockgroup_geoid = substr(blockgroup_geoid, 2, 10)
+(233,866 real changes made)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. cd "$INPUT_PATH/Voting_census_block"
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 E
+> CO375\ECO375 Project\1 - Data\Voting_census_block
+
+. clear all
+
+. import delimited "2021blockgroupvoting.csv"
+(encoding automatically selected: ISO-8859-1)
+(9 vars, 233,866 obs)
+
+. tostring blockgroup_geoid, replace format("%14.0f")
+blockgroup_geoid was double now str12
+
+. 
+. replace blockgroup_geoid = "0" + blockgroup_geoid if strlen(blockgro
+> up_geoid)==11
+(43,877 real changes made)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. replace blockgroup_geoid = substr(blockgroup_geoid, 1, 10)
+(233,866 real changes made)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. 
+. egen tract_dem_total = total(dem), by(tract_code)
+variable tract_code not found
+(error in option by())
+r(111);
+
+end of do-file
+
+r(111);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. gen tract_code = substr(blockgroup_geoid, 1, 10)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. egen tract_dem_total = total(dem), by(tract_code)
+
+. egen tract_rep_total = total(rep), by(tract_code)
+
+. egen tract_lib_total = total(lib), by(tract_code)
+
+. egen tract_oth_total = total(oth), by(tract_code)
+
+. duplicates drop tract_code, force
+
+Duplicates in terms of tract_code
+
+(184,918 observations deleted)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. save 2021blockgroupvoting_cleaned
+file 2021blockgroupvoting_cleaned.dta saved
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. save 2021blockgroupvoting_cleaned, replace
+file 2021blockgroupvoting_cleaned.dta saved
+
+. 
+end of do-file
+
+. br
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. drop rep-precincts
+
+. drop tract_dem_total-tract_oth_total
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. save 2021blockgroupvoting_cleaned, replace
+file 2021blockgroupvoting_cleaned.dta saved
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. clear all
+
+. import delimited "2021blockgroupvoting.csv"
+(encoding automatically selected: ISO-8859-1)
+(9 vars, 233,866 obs)
+
+. tostring blockgroup_geoid, replace format("%14.0f")
+blockgroup_geoid was double now str12
+
+. 
+. replace blockgroup_geoid = "0" + blockgroup_geoid if strlen(blockgro
+> up_geoid)==11
+(43,877 real changes made)
+
+. gen tract_code = substr(blockgroup_geoid, 1, 10)
+
+. 
+. egen tract_dem_total = total(dem), by(tract_code)
+
+. egen tract_rep_total = total(rep), by(tract_code)
+
+. egen tract_lib_total = total(lib), by(tract_code)
+
+. egen tract_oth_total = total(oth), by(tract_code)
+
+. duplicates drop tract_code, force
+
+Duplicates in terms of tract_code
+
+(184,918 observations deleted)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. drop rep-precincts
+
+. drop blockgroup_geoid
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. save 2021blockgroupvoting_cleaned, replace
+file 2021blockgroupvoting_cleaned.dta saved
 
 . 
 end of do-file
