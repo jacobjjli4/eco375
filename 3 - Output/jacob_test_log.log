@@ -1,0 +1,73 @@
+----------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:/Users/lijia/OneDrive - University of Toronto/Documents
+> /School/1-5 ECO375/ECO375 Project//3 - Output/jacob_test_log.log
+  log type:  text
+ opened on:  26 Feb 2023, 11:15:55
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. shp2dta using Tracts_2020_HOLC, database(usdb) coordinates(uscoord) 
+> genid(id)
+type: 5
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. shp2dta using Tracts_2020_HOLC, database(Tracats_2020_HOLC) coordina
+> tes(Tracts_2020_HOLC_coord) genid(id)
+type: 5
+
+. 
+end of do-file
+
+. help shp2dta
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. shp2dta using Tracts_2020_HOLC, database(Tracts_2020_HOLC) coordinat
+> es(Tracts_2020_HOLC_coord) genid(id)
+type: 5
+file Tracts_2020_HOLC_coord.dta already exists
+r(602);
+
+end of do-file
+
+r(602);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. shp2dta using Tracts_2020_HOLC, database(Tracts_2020_HOLC) coordinat
+> es(Tracts_2020_HOLC_coord) genid(id)
+type: 5
+
+. 
+end of do-file
+
+. use Tracts_2020_HOLC.dta
+
+. help shp2dta
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. shp2dta using Tracts_2020_HOLC, database(Tracts_2020_HOLC) ///
+>         coordinates(Tracts_2020_HOLC_coord) genid(id) replace
+type: 5
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STDe730_000000.tmp"
+
+. cd "$INPUT_PATH/Voting_census_block"
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 E
+> CO375\ECO375 Project\1 - Data\Voting_census_block
+
+. 
+end of do-file
+
