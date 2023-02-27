@@ -139,3 +139,30 @@ end of do-file
 . use "/Users/benlee/Documents/GitHub/eco375/1 - Data/Voting_census_block/2021blockgroupvoting_cleaned.dta
 > "
 
+. do "/var/folders/j7/_qnfgl017_v_qrh41nwsy5k40000gn/T//SD83936.000000"
+
+. /*******************************************************************************
+> Class:                          ECO375 Winter 2023
+> Project:                        Feasibility Plan
+> Name:                           Jia Jun (Jacob) Li 1006824750
+> Name:                           Benjamin Lee 1007236475
+> 
+> Date Created:           Feb 27 2023
+> Last Updated:           Feb 27 2023
+> *******************************************************************************/
+. 
+. * Set up global directories and log file
+. // global PATH "C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Proje
+> ct/"w
+. // global OUTPUT_PATH "$PATH/3 - Output"
+. // global INPUT_PATH "$PATH/1 - Data"
+. 
+. * Directories for Ben
+. global PATH "/Users/benlee/Documents/GitHub/eco375"
+
+. global OUTPUT_PATH "$PATH/3 - Output"
+
+. global INPUT_PATH "$PATH/1 - Data"
+
+. 
+. capture log close

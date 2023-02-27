@@ -18,6 +18,8 @@ global PATH "/Users/benlee/Documents/GitHub/eco375"
 global OUTPUT_PATH "$PATH/3 - Output"
 global INPUT_PATH "$PATH/1 - Data"
 
+cd "$OUTPUT_PATH"
+
 capture log close
 log using "$OUTPUT_PATH/feas_plan_log", replace text
 
