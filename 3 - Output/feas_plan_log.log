@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  /Users/benlee/Documents/GitHub/eco375/3 - Output/feas_plan_log.log
   log type:  text
- opened on:  27 Feb 2023, 10:42:53
+ opened on:  27 Feb 2023, 14:54:33
 
 . 
 . cd "$INPUT_PATH/Merge"
@@ -10,7 +10,7 @@
 
 . 
 . * Load collapsed data for regression
-. use "HOLC_cleaned_collapsed.dta", clear
+. use "HOLC_Voting_Merged.dta", clear
 
 . 
 . * Scatter plot
@@ -20,18 +20,18 @@
 . * Regression
 . regress tract_dvoteshare perc_tract_d if perc_tract_d <= 1, robust
 
-Linear regression                               Number of obs     =      4,675
-                                                F(1, 4673)        =     659.06
+Linear regression                               Number of obs     =      7,630
+                                                F(1, 7628)        =     831.32
                                                 Prob > F          =     0.0000
-                                                R-squared         =     0.1163
-                                                Root MSE          =     .15451
+                                                R-squared         =     0.0848
+                                                Root MSE          =     .15497
 
 ------------------------------------------------------------------------------
              |               Robust
 tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-perc_tract_d |   .1498373   .0058366    25.67   0.000     .1383948    .1612797
-       _cons |   .7037743   .0040471   173.90   0.000     .6958402    .7117085
+perc_tract_d |   .1330478   .0046145    28.83   0.000     .1240022    .1420935
+       _cons |   .7152514   .0028164   253.96   0.000     .7097305    .7207722
 ------------------------------------------------------------------------------
 
 . 

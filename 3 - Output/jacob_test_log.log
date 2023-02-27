@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  /Users/benlee/Documents/GitHub/eco375/3 - Output/jacob_test_log.log
   log type:  text
- opened on:  27 Feb 2023, 04:09:02
+ opened on:  27 Feb 2023, 14:39:26
 
 . 
 . cd "$INPUT_PATH/Tracts_2020_HOLC"
@@ -44,13 +44,7 @@ type: 5
 (31,338 missing values generated)
 
 . 
-. duplicates drop tract_code, force
-
-Duplicates in terms of tract_code
-
-(25,481 observations deleted)
-
-. save Tracts_2020_HOLC_cleaned, replace
+. save "Tracts_2020_HOLC_cleaned.dta", replace
 file Tracts_2020_HOLC_cleaned.dta saved
 
 . 
@@ -106,13 +100,22 @@ Duplicates in terms of tract_code
 file 2021blockgroupvoting_cleaned.dta saved
 
 . 
-. * merge datasets
-. cd "$INPUT_PATH/Merge"
-/Users/benlee/Documents/GitHub/eco375/1 - Data/Merge
-
-. clear all
-
+. * collapse HOLC data to tract level units of observation
 . use "$INPUT_PATH/Tracts_2020_HOLC/Tracts_2020_HOLC_cleaned.dta"
+
+. preserve
+
+. collapse (max) perc_tract_*, by(tract_code)
+
+. save "$INPUT_PATH/Tracts_2020_HOLC/HOLC_collapsed.dta", replace
+file /Users/benlee/Documents/GitHub/eco375/1 - Data/Tracts_2020_HOLC/HOLC_collapsed.dta saved
+
+. 
+. restore
+
+. 
+. * merge datasets
+. use "$INPUT_PATH/Tracts_2020_HOLC/HOLC_collapsed.dta"
 
 . merge m:1 tract_code using "$INPUT_PATH/Voting_census_block/2021blockgroupvoting_cleaned.dta"
 
@@ -126,20 +129,13 @@ file 2021blockgroupvoting_cleaned.dta saved
     -----------------------------------------
 
 . 
-. * collapse data to tract level units of observation
-. 
-. collapse perc_tract_* tract_dvoteshare tract_rvoteshare, by(tract_code)
-
-. save "$INPUT_PATH/Merge/HOLC_cleaned_collapsed.dta"
-file /Users/benlee/Documents/GitHub/eco375/1 - Data/Merge/HOLC_cleaned_collapsed.dta saved
+. save "$INPUT_PATH/Merge/HOLC_Voting_Merged.dta", replace
+file /Users/benlee/Documents/GitHub/eco375/1 - Data/Merge/HOLC_Voting_Merged.dta saved
 
 . 
 end of do-file
 
-. use "/Users/benlee/Documents/GitHub/eco375/1 - Data/Voting_census_block/2021blockgroupvoting_cleaned.dta
-> "
-
-. do "/var/folders/j7/_qnfgl017_v_qrh41nwsy5k40000gn/T//SD83936.000000"
+. do "/Users/benlee/Documents/GitHub/eco375/2 - Code/Initial Regression for Feasibility Plan.do"
 
 . /*******************************************************************************
 > Class:                          ECO375 Winter 2023
@@ -163,6 +159,10 @@ end of do-file
 . global OUTPUT_PATH "$PATH/3 - Output"
 
 . global INPUT_PATH "$PATH/1 - Data"
+
+. 
+. cd "$OUTPUT_PATH"
+/Users/benlee/Documents/GitHub/eco375/3 - Output
 
 . 
 . capture log close
