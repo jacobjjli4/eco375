@@ -45,8 +45,7 @@ egen perc_tract_b = total(SUM_Perc) if FIRST_holc == "B", by(tract_code)
 egen perc_tract_c = total(SUM_Perc) if FIRST_holc == "C", by(tract_code)
 egen perc_tract_d = total(SUM_Perc) if FIRST_holc == "D", by(tract_code)
 
-duplicates drop tract_code, force
-save Tracts_2020_HOLC_cleaned, replace
+save "Tracts_2020_HOLC_cleaned.dta", replace
 
 * import and clean voting data
 cd "$INPUT_PATH/Voting_census_block"
@@ -71,13 +70,16 @@ drop blockgroup_geoid
 
 save 2021blockgroupvoting_cleaned, replace
 
-* merge datasets
-cd "$INPUT_PATH/Merge"
-clear all
+* collapse HOLC data to tract level units of observation
 use "$INPUT_PATH/Tracts_2020_HOLC/Tracts_2020_HOLC_cleaned.dta"
+preserve
+collapse (max) perc_tract_*, by(tract_code)
+save "$INPUT_PATH/Tracts_2020_HOLC/HOLC_collapsed.dta", replace
+
+restore
+
+* merge datasets
+use "$INPUT_PATH/Tracts_2020_HOLC/HOLC_collapsed.dta"
 merge m:1 tract_code using "$INPUT_PATH/Voting_census_block/2021blockgroupvoting_cleaned.dta"
 
-* collapse data to tract level units of observation
-
-collapse perc_tract_* tract_dvoteshare tract_rvoteshare, by(tract_code)
-save "$INPUT_PATH/Merge/HOLC_cleaned_collapsed.dta", replace
+save "$INPUT_PATH/Merge/HOLC_Voting_Merged.dta", replace

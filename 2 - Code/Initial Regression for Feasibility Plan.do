@@ -26,7 +26,7 @@ log using "$OUTPUT_PATH/feas_plan_log", replace text
 cd "$INPUT_PATH/Merge"
 
 * Load collapsed data for regression
-use "HOLC_cleaned_collapsed.dta", clear
+use "HOLC_Voting_Merged.dta", clear
 
 * Scatter plot
 scatter tract_dvoteshare perc_tract_d if perc_tract_d <= 1
