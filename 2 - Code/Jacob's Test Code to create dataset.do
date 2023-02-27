@@ -80,4 +80,4 @@ merge m:1 tract_code using "$INPUT_PATH/Voting_census_block/2021blockgroupvoting
 * collapse data to tract level units of observation
 
 collapse perc_tract_* tract_dvoteshare tract_rvoteshare, by(tract_code)
-save "$INPUT_PATH/Merge/HOLC_cleaned_collapsed.dta"
+save "$INPUT_PATH/Merge/HOLC_cleaned_collapsed.dta", replace
