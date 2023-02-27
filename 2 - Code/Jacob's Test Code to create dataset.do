@@ -2,6 +2,7 @@
 Class: 				ECO375 Winter 2023
 Project: 			Feasibility Plan
 Name: 				Jia Jun (Jacob) Li 1006824750
+Name:				Benjamin Lee 1007236475
 
 Date Created: 		Feb 25 2023
 Last Updated:		Feb 26 2023
@@ -11,7 +12,12 @@ clear all
 set more off
 
 * Set up global directories and log file
-global PATH "C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project/"
+// global PATH "C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project/"w
+// global OUTPUT_PATH "$PATH/3 - Output"
+// global INPUT_PATH "$PATH/1 - Data"
+
+*Directories for Ben
+global PATH "/Users/benlee/Documents/GitHub/eco375"
 global OUTPUT_PATH "$PATH/3 - Output"
 global INPUT_PATH "$PATH/1 - Data"
 
@@ -34,7 +40,13 @@ gen tract_code3 = substr(GISJOIN, 9, 6)
 egen tract_code = concat(tract_code*)
 drop tract_code1-tract_code3
 
-save Tracts_2020_HOLC_cleaned
+egen perc_tract_a = total(SUM_Perc) if FIRST_holc == "A", by(tract_code)
+egen perc_tract_b = total(SUM_Perc) if FIRST_holc == "B", by(tract_code)
+egen perc_tract_c = total(SUM_Perc) if FIRST_holc == "C", by(tract_code)
+egen perc_tract_d = total(SUM_Perc) if FIRST_holc == "D", by(tract_code)
+
+duplicates drop tract_code, force
+save Tracts_2020_HOLC_cleaned, replace
 
 * import and clean voting data
 cd "$INPUT_PATH/Voting_census_block"
@@ -49,6 +61,9 @@ egen tract_dem_total = total(dem), by(tract_code)
 egen tract_rep_total = total(rep), by(tract_code)
 egen tract_lib_total = total(lib), by(tract_code)
 egen tract_oth_total = total(oth), by(tract_code)
+gen tract_vote_total = tract_dem_total + tract_rep_total + tract_lib_total + tract_oth_total
+gen tract_dvoteshare = tract_dem_total / tract_vote_total
+gen tract_rvoteshare = tract_rep_total / tract_vote_total
 duplicates drop tract_code, force
 
 drop rep-precincts
@@ -61,3 +76,8 @@ cd "$INPUT_PATH/Merge"
 clear all
 use "$INPUT_PATH/Tracts_2020_HOLC/Tracts_2020_HOLC_cleaned.dta"
 merge m:1 tract_code using "$INPUT_PATH/Voting_census_block/2021blockgroupvoting_cleaned.dta"
+
+* collapse data to tract level units of observation
+
+collapse perc_tract_* tract_dvoteshare tract_rvoteshare, by(tract_code)
+save "$INPUT_PATH/Merge/HOLC_cleaned_collapsed.dta"
