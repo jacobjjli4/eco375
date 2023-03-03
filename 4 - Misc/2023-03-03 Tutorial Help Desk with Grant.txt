@@ -1,0 +1,16 @@
+We are regressing based on the percentage of a census tract that was "redlined". Our unit of observation is county. Is this a valid research design, or should we regress with our unit of observation as HOLC neighbourhood?
+- This is likely the best way to do it; mapping data is quite difficult to use
+- If we see a criticism about this, we should address it in the paper
+
+Follow-up: can we add perc_tract_c in addition to perc_tract_d in our regression?
+- Likely a bad idea -- you would run into collinearity problems (consider the extreme case where you add perc_tract_a, perc_tract_b, perc_tract_c, and perc_tract_d: we would get perfect collinearity).
+
+In our merge, we had about 500 observations dropped out of 5000 in our left dataset (HOLC maps). This seems suspicious. How can we verify this?
+- Manually check for errors in the merge variable
+	- Upper and lowercase characters
+	- leading 0s (ex. make sure the state codes are written like 01, not 1)
+- Map the data quickly to see if there are any "holes" in the data; try using the spmap module
+
+What if we add more covariates to the dataset and we lose statistical significance?
+- It's okay to have a null result; one of the professors at U of T did their PhD at Princeton and got a null result.
+- Tell a good story about the null result and you should be good!
