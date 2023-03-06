@@ -5,21 +5,21 @@ Name: 				Jia Jun (Jacob) Li 1006824750
 Name:				Benjamin Lee 1007236475
 
 Date Created: 		Feb 25 2023
-Last Updated:		Feb 26 2023
+Last Updated:		Mar 5 2023
 *******************************************************************************/
 
 clear all
 set more off
 
-* Set up global directories and log file
-// global PATH "C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project/"w
-// global OUTPUT_PATH "$PATH/3 - Output"
-// global INPUT_PATH "$PATH/1 - Data"
-
-*Directories for Ben
-global PATH "/Users/benlee/Documents/GitHub/eco375"
+* Directories for Jacob
+global PATH "C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project/"
 global OUTPUT_PATH "$PATH/3 - Output"
 global INPUT_PATH "$PATH/1 - Data"
+
+* Directories for Ben
+// global PATH "/Users/benlee/Documents/GitHub/eco375"
+// global OUTPUT_PATH "$PATH/3 - Output"
+// global INPUT_PATH "$PATH/1 - Data"
 
 capture log close
 log using "$OUTPUT_PATH/jacob_test_log", replace text
@@ -73,13 +73,15 @@ save 2021blockgroupvoting_cleaned, replace
 * collapse HOLC data to tract level units of observation
 use "$INPUT_PATH/Tracts_2020_HOLC/Tracts_2020_HOLC_cleaned.dta"
 preserve
-collapse (max) perc_tract_*, by(tract_code)
+collapse (max) perc_tract_* (first) GISJOIN MAX_city MAX_state , by(tract_code)
 save "$INPUT_PATH/Tracts_2020_HOLC/HOLC_collapsed.dta", replace
 
 restore
 
 * merge datasets
+clear all
 use "$INPUT_PATH/Tracts_2020_HOLC/HOLC_collapsed.dta"
 merge m:1 tract_code using "$INPUT_PATH/Voting_census_block/2021blockgroupvoting_cleaned.dta"
+* Three states did not report their results at the precinct level: South Dakota, Kentucky and West Virginia.
 
 save "$INPUT_PATH/Merge/HOLC_Voting_Merged.dta", replace
