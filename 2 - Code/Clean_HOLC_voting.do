@@ -45,6 +45,12 @@ egen perc_tract_b = total(SUM_Perc) if FIRST_holc == "B", by(tract_code)
 egen perc_tract_c = total(SUM_Perc) if FIRST_holc == "C", by(tract_code)
 egen perc_tract_d = total(SUM_Perc) if FIRST_holc == "D", by(tract_code)
 
+foreach var in perc_tract_a perc_tract_b perc_tract_c perc_tract_d {
+	replace `var' = 0 if `var' == .
+	replace `var' = 1 if `var' > 1
+}
+
+
 save "Tracts_2020_HOLC_cleaned.dta", replace
 
 * import and clean voting data
@@ -83,5 +89,7 @@ clear all
 use "$INPUT_PATH/Tracts_2020_HOLC/HOLC_collapsed.dta"
 merge m:1 tract_code using "$INPUT_PATH/Voting_census_block/2021blockgroupvoting_cleaned.dta"
 * Three states did not report their results at the precinct level: South Dakota, Kentucky and West Virginia.
+
+* clean merged dataset
 
 save "$INPUT_PATH/Merge/HOLC_Voting_Merged.dta", replace
