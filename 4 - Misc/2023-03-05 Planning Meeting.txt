@@ -1,0 +1,17 @@
+2023-03-05 Planning Meeting
+
+===To-do (data)===
+Jacob:
+- Check if merge went smoothly
+- Drop/make note of census tracts that are below a certain threshold of HOLC percentage
+
+Ben:
+- Add in census data/American Community Survey data
+	- Include covariates that are known to affect political outcomes (quick literature review; ex. social mobility, etc.)
+
+Supplemental, future problem:
+- Add in voter participation data as another Y variable (political outcomes in general)
+
+===To-do (presentation)===
+- send outlines by Tuesday 8:00 PM for peer review
+	- focus on if/how to explain "nitty gritty" of redlining, data merge, etc.
