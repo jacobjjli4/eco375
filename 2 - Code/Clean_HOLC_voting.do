@@ -91,5 +91,9 @@ merge m:1 tract_code using "$INPUT_PATH/Voting_census_block/2021blockgroupvoting
 * Three states did not report their results at the precinct level: South Dakota, Kentucky and West Virginia.
 
 * clean merged dataset
+drop GISJOIN MAX_state
+rename MAX_city city
 
+* remove census tracts that are not matched with HOLC tracts
+egen tract_holc_share = rowtotal(perc_tract_*)
 save "$INPUT_PATH/Merge/HOLC_Voting_Merged.dta", replace
