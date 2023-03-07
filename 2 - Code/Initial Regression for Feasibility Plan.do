@@ -29,8 +29,8 @@ cd "$INPUT_PATH/Merge"
 use "HOLC_Voting_Merged.dta", clear
 
 * Scatter plot
-scatter tract_dvoteshare perc_tract_d
+scatter tract_dvoteshare perc_tract_d if tract_holc_share > 0.8
 
 * Regression
-regress tract_dvoteshare perc_tract_d, robust
+regress tract_dvoteshare perc_tract_d if tract_holc_share > 0.8, robust
 log close
