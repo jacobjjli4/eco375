@@ -1,39 +1,109 @@
-----------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  /Users/benlee/Documents/GitHub/eco375/3 - Output/feas_plan_log.log
+       log:  C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/feas_plan_log.log
   log type:  text
- opened on:  27 Feb 2023, 14:54:33
+ opened on:   7 Mar 2023, 12:58:14
 
 . 
 . cd "$INPUT_PATH/Merge"
-/Users/benlee/Documents/GitHub/eco375/1 - Data/Merge
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 ECO375\ECO375 Project\1 - Data\Merge
 
 . 
-. * Load collapsed data for regression
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD2614_000000.tmp"
+
 . use "HOLC_Voting_Merged.dta", clear
 
 . 
-. * Scatter plot
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD2614_000000.tmp"
+
 . scatter tract_dvoteshare perc_tract_d if perc_tract_d <= 1
 
 . 
-. * Regression
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD2614_000000.tmp"
+
 . regress tract_dvoteshare perc_tract_d if perc_tract_d <= 1, robust
 
-Linear regression                               Number of obs     =      7,630
-                                                F(1, 7628)        =     831.32
+Linear regression                               Number of obs     =   
+>   16,363
+                                                F(1, 16361)       =   
+>  1483.57
+                                                Prob > F          =   
+>   0.0000
+                                                R-squared         =   
+>   0.0608
+                                                Root MSE          =   
+>   .15839
+
+----------------------------------------------------------------------
+> --------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. i
+> nterval]
+-------------+--------------------------------------------------------
+> --------
+perc_tract_d |   .1302126   .0033806    38.52   0.000     .1235862    
+> .1368391
+       _cons |   .7172509   .0014744   486.47   0.000      .714361    
+> .7201409
+----------------------------------------------------------------------
+> --------
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD2614_000000.tmp"
+
+. regress tract_dvoteshare perc_tract_d if perc_tract_d <= 1, robust
+
+Linear regression                               Number of obs     =     16,363
+                                                F(1, 16361)       =    1483.57
                                                 Prob > F          =     0.0000
-                                                R-squared         =     0.0848
-                                                Root MSE          =     .15497
+                                                R-squared         =     0.0608
+                                                Root MSE          =     .15839
 
 ------------------------------------------------------------------------------
              |               Robust
 tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 -------------+----------------------------------------------------------------
-perc_tract_d |   .1330478   .0046145    28.83   0.000     .1240022    .1420935
-       _cons |   .7152514   .0028164   253.96   0.000     .7097305    .7207722
+perc_tract_d |   .1302126   .0033806    38.52   0.000     .1235862    .1368391
+       _cons |   .7172509   .0014744   486.47   0.000      .714361    .7201409
 ------------------------------------------------------------------------------
 
 . 
 end of do-file
 
+. do "C:\Users\lijia\AppData\Local\Temp\STD2614_000000.tmp"
+
+. regress tract_dvoteshare perc_tract_d, robust
+
+Linear regression                               Number of obs     =     16,363
+                                                F(1, 16361)       =    1483.57
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0608
+                                                Root MSE          =     .15839
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .1302126   .0033806    38.52   0.000     .1235862    .1368391
+       _cons |   .7172509   .0014744   486.47   0.000      .714361    .7201409
+------------------------------------------------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD2614_000000.tmp"
+
+. log close
+      name:  <unnamed>
+       log:  C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/feas_plan_log.log
+  log type:  text
+ closed on:   7 Mar 2023, 13:00:21
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
