@@ -1,0 +1,11 @@
+What cutoff should we use for observations that are not entirely within the HOLC mapped area?
+- Run multiple regressions
+- consider using base specification with only the tracts that are 95% or 90% in the HOLC mapped area
+- for robustness, adjust regression by 5% each time to see if the results remain similar
+
+How can we include C or D tracts in our independent variable?
+- Multiple options:
+	- regress on only D (baseline model)
+	- take the sum of C and D
+	- regress on C and D individually
+	- consider regressing on B, C, and D
