@@ -3,7 +3,7 @@
        log:  C:/Users/lijia/OneDrive - University of Toronto/Documents
 > /School/1-5 ECO375/ECO375 Project//3 - Output/feas_plan_log.log
   log type:  text
- opened on:  11 Mar 2023, 11:19:37
+ opened on:  11 Mar 2023, 14:20:21
 
 . 
 . cd "$INPUT_PATH/Merge"
@@ -16,132 +16,23 @@ C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 E
 
 . 
 . * Scatter plot
-. foreach min_perc in numlist 100 95 to 0{
-  2.         print(`min_perc')
-  3. }
-file (numlist) not found
-r(601);
-
-end of do-file
-
-r(601);
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD62f8_000000.tmp"
-
-. foreach min_perc in numlist 100 95 to 0{
-  2.         dis `min_perc'
-  3. }
-numlist not found
-r(111);
-
-end of do-file
-
-r(111);
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD62f8_000000.tmp"
-
-. foreach min_perc in 100 95 to 0{
-  2.         dis `min_perc'
-  3. }
-100
-95
-to not found
-r(111);
-
-end of do-file
-
-r(111);
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD62f8_000000.tmp"
-
-. foreach min_perc in 100 95:0 {
-  2.         dis `min_perc'
-  3. }
-100
-95:0 invalid name
-r(198);
-
-end of do-file
-
-r(198);
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD62f8_000000.tmp"
-
-. foreach min_perc in 0 5:100 {
-  2.         dis `min_perc'
-  3. }
-0
-5:100 invalid name
-r(198);
-
-end of do-file
-
-r(198);
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD62f8_000000.tmp"
-
-. foreach min_perc of numlist 0 5:100 {
-  2.         dis `min_perc'
-  3. }
-0
-5
-10
-15
-20
-25
-30
-35
-40
-45
-50
-55
-60
-65
-70
-75
-80
-85
-90
-95
-100
+. scatter tract_dvoteshare perc_tract_d if tract_holc_share > 0.8
 
 . 
-end of do-file
-
-. help quietly
-
-. help esttab
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD62f8_000000.tmp"
-
-. foreach min_perc of numlist 0 5:100 {
-  2.         eststo robustness_`min_perc': reg regress tract_dvoteshar
-> e perc_tract_d if tract_holc_share > `min_perc', robust
-  3. }
-variable regress not found
-r(111);
-
-end of do-file
-
-r(111);
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD62f8_000000.tmp"
-
-. foreach min_perc of numlist 0 5:100 {
-  2.         eststo robustness_`min_perc': reg tract_dvoteshare perc_t
-> ract_d if tract_holc_share > `min_perc', robust
-  3. }
+. * Regression
+. regress tract_dvoteshare perc_tract_d if tract_holc_share > 0.8, rob
+> ust
 
 Linear regression                               Number of obs     =   
->   16,352
-                                                F(1, 16350)       =   
->  1479.13
+>    7,434
+                                                F(1, 7432)        =   
+>   385.55
                                                 Prob > F          =   
 >   0.0000
                                                 R-squared         =   
->   0.0606
+>   0.0396
                                                 Root MSE          =   
->   .15842
+>    .1463
 
 ----------------------------------------------------------------------
 > --------
@@ -150,98 +41,17 @@ tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. i
 > nterval]
 -------------+--------------------------------------------------------
 > --------
-perc_tract_d |   .1300968   .0033827    38.46   0.000     .1234663    
-> .1367272
-       _cons |   .7172184   .0014752   486.20   0.000     .7143269    
-> .7201099
+perc_tract_d |   .0762276   .0038822    19.64   0.000     .0686174    
+> .0838377
+       _cons |   .7654135   .0021479   356.35   0.000     .7612029    
+>  .769624
 ----------------------------------------------------------------------
 > --------
-no observations
-r(2000);
 
-end of do-file
-
-r(2000);
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD62f8_000000.tmp"
-
-. foreach min_perc of numlist 0 5:100 {
-  2.         eststo robustness_`min_perc': reg tract_dvoteshare perc_t
-> ract_d if tract_holc_share >= `min_perc', robust
-  3. }
-
-Linear regression                               Number of obs     =   
->   16,352
-                                                F(1, 16350)       =   
->  1479.13
-                                                Prob > F          =   
->   0.0000
-                                                R-squared         =   
->   0.0606
-                                                Root MSE          =   
->   .15842
-
-----------------------------------------------------------------------
-> --------
-             |               Robust
-tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. i
-> nterval]
--------------+--------------------------------------------------------
-> --------
-perc_tract_d |   .1300968   .0033827    38.46   0.000     .1234663    
-> .1367272
-       _cons |   .7172184   .0014752   486.20   0.000     .7143269    
-> .7201099
-----------------------------------------------------------------------
-> --------
-no observations
-r(2000);
-
-end of do-file
-
-r(2000);
-
-. br
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD62f8_000000.tmp"
-
-. foreach min_perc of numlist 0 0.05:1 {
-  2.         eststo robustness_`min_perc': reg tract_dvoteshare perc_t
-> ract_d if tract_holc_share >= `min_perc', robust
-  3. }
-
-Linear regression                               Number of obs     =   
->   16,352
-                                                F(1, 16350)       =   
->  1479.13
-                                                Prob > F          =   
->   0.0000
-                                                R-squared         =   
->   0.0606
-                                                Root MSE          =   
->   .15842
-
-----------------------------------------------------------------------
-> --------
-             |               Robust
-tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. i
-> nterval]
--------------+--------------------------------------------------------
-> --------
-perc_tract_d |   .1300968   .0033827    38.46   0.000     .1234663    
-> .1367272
-       _cons |   .7172184   .0014752   486.20   0.000     .7143269    
-> .7201099
-----------------------------------------------------------------------
-> --------
-robustness_.05 invalid name
-r(198);
-
-end of do-file
-
-r(198);
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD62f8_000000.tmp"
+. 
+. * Robustness check -- does changing the tract_holc_share cutoff affe
+> ct results?
+. quietly
 
 . foreach min_perc of numlist 0 5:100 {
   2.         eststo robustness_`min_perc': reg tract_dvoteshare perc_t
@@ -773,71 +583,404 @@ perc_tract_d |   .0711084   .0054263    13.10   0.000     .0604688
 ----------------------------------------------------------------------
 > --------
 
-. 
-end of do-file
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD62f8_000000.tmp"
-
-. esttab robustness_* using "$OUTPUT_PATH/min_tract_holc_share_robustn
-> ess.smcl",
-(output written to C:/Users/lijia/OneDrive - University of Toronto/Doc
-> uments/School/1-5 ECO375/ECO375 Project//3 - Output/min_tract_holc_s
-> hare_robustness.smcl)
-
-.         se star(* 0.10 ** 0.05 *** 0.01) replace;
--set star- not allowed; 'star' not recognized
-r(199);
-
-end of do-file
-
-r(199);
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD62f8_000000.tmp"
-
-. esttab robustness_* using "$OUTPUT_PATH/min_tract_holc_share_robustn
-> ess.smcl", se star(* 0.10 ** 0.05 *** 0.01) replace;
-option ; not allowed
-r(198);
-
-end of do-file
-
-r(198);
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD62f8_000000.tmp"
-
-. esttab robustness_* using "$OUTPUT_PATH/min_tract_holc_share_robustn
-> ess.smcl", se star(* 0.10 ** 0.05 *** 0.01) replace
-(output written to C:/Users/lijia/OneDrive - University of Toronto/Doc
-> uments/School/1-5 ECO375/ECO375 Project//3 - Output/min_tract_holc_s
-> hare_robustness.smcl)
-
-. 
-end of do-file
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD62f8_000000.tmp"
-
-. esttab robustness_* using "$OUTPUT_PATH/min_tract_holc_share_robustn
-> ess.rtf", se star(* 0.10 ** 0.05 *** 0.01) replace
-(file C:/Users/lijia/OneDrive - University of
-    Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 -
-    Output/min_tract_holc_share_robustness.rtf not found)
-(output written to C:/Users/lijia/OneDrive - University of Toronto/Doc
-> uments/School/1-5 ECO375/ECO375 Project//3 - Output/min_tract_holc_s
-> hare_robustness.rtf)
-
-. 
-end of do-file
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD62f8_000000.tmp"
-
 . esttab robustness_* using "$OUTPUT_PATH/min_tract_holc_share_robustn
 > ess.csv", se star(* 0.10 ** 0.05 *** 0.01) replace
-(file C:/Users/lijia/OneDrive - University of
-    Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 -
-    Output/min_tract_holc_share_robustness.csv not found)
 (output written to C:/Users/lijia/OneDrive - University of Toronto/Doc
 > uments/School/1-5 ECO375/ECO375 Project//3 - Output/min_tract_holc_s
 > hare_robustness.csv)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD46f8_000000.tmp"
+
+. drop _est_robustness*
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD46f8_000000.tmp"
+
+. esttab robustness_* using "$OUTPUT_PATH/redlining_measure_robustness
+> .csv", se star(* 0.10 ** 0.05 *** 0.01) replace
+(output written to C:/Users/lijia/OneDrive - University of Toronto/Doc
+> uments/School/1-5 ECO375/ECO375 Project//3 - Output/redlining_measur
+> e_robustness.csv)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD46f8_000000.tmp"
+
+. drop _est_robustness*
+variable _est_robustness* not found
+r(111);
+
+end of do-file
+
+r(111);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD46f8_000000.tmp"
+
+. eststo robustness2_d: regress tract_dvoteshare perc_tract_d if tract
+> _holc_share > 0.9
+
+      Source |       SS           df       MS      Number of obs   =  
+>    6,073
+-------------+----------------------------------   F(1, 6071)      =  
+>   251.77
+       Model |  5.37830104         1  5.37830104   Prob > F        =  
+>   0.0000
+    Residual |  129.689865     6,071  .021362192   R-squared       =  
+>   0.0398
+-------------+----------------------------------   Adj R-squared   =  
+>   0.0397
+       Total |  135.068166     6,072  .022244428   Root MSE        =  
+>   .14616
+
+----------------------------------------------------------------------
+> --------
+tract_dvot~e | Coefficient  Std. err.      t    P>|t|     [95% conf. i
+> nterval]
+-------------+--------------------------------------------------------
+> --------
+perc_tract_d |   .0739926   .0046633    15.87   0.000      .064851    
+> .0831342
+       _cons |   .7706106   .0022841   337.39   0.000      .766133    
+> .7750881
+----------------------------------------------------------------------
+> --------
+
+. gen perc_tract_c_plus_d = perc_tract_c + perc_tract_d
+
+. eststo robustness2_c_plus_d: regress tract_dvoteshare perc_tract_c_p
+> lus_d if tract_holc_share > 0.9
+
+      Source |       SS           df       MS      Number of obs   =  
+>    6,073
+-------------+----------------------------------   F(1, 6071)      =  
+>   118.74
+       Model |  2.59114984         1  2.59114984   Prob > F        =  
+>   0.0000
+    Residual |  132.477016     6,071  .021821284   R-squared       =  
+>   0.0192
+-------------+----------------------------------   Adj R-squared   =  
+>   0.0190
+       Total |  135.068166     6,072  .022244428   Root MSE        =  
+>   .14772
+
+----------------------------------------------------------------------
+> --------
+tract_dvot~e | Coefficient  Std. err.      t    P>|t|     [95% conf. i
+> nterval]
+-------------+--------------------------------------------------------
+> --------
+perc_tra~s_d |    .053977   .0049534    10.90   0.000     .0442666    
+> .0636874
+       _cons |   .7517608   .0040934   183.65   0.000     .7437364    
+> .7597852
+----------------------------------------------------------------------
+> --------
+
+. eststo robustness2_c_and_d: regress tract_dvoteshare perc_tract_c pe
+> rc_tract_d if tract_holc_share > 0.9
+
+      Source |       SS           df       MS      Number of obs   =  
+>    6,073
+-------------+----------------------------------   F(2, 6070)      =  
+>   137.51
+       Model |  5.85447252         2  2.92723626   Prob > F        =  
+>   0.0000
+    Residual |  129.213693     6,070  .021287264   R-squared       =  
+>   0.0433
+-------------+----------------------------------   Adj R-squared   =  
+>   0.0430
+       Total |  135.068166     6,072  .022244428   Root MSE        =  
+>    .1459
+
+----------------------------------------------------------------------
+> --------
+tract_dvot~e | Coefficient  Std. err.      t    P>|t|     [95% conf. i
+> nterval]
+-------------+--------------------------------------------------------
+> --------
+perc_tract_c |   .0255588    .005404     4.73   0.000      .014965    
+> .0361527
+perc_tract_d |   .0892226   .0056603    15.76   0.000     .0781264    
+> .1003188
+       _cons |    .754778   .0040503   186.35   0.000      .746838    
+>  .762718
+----------------------------------------------------------------------
+> --------
+
+. eststo robustness2_b_c_d: regress tract_dvoteshare perc_tract_a perc
+> _tract_c perc_tract_d if tract_holc_share > 0.9
+
+      Source |       SS           df       MS      Number of obs   =  
+>    6,073
+-------------+----------------------------------   F(3, 6069)      =  
+>    92.22
+       Model |  5.88856689         3  1.96285563   Prob > F        =  
+>   0.0000
+    Residual |  129.179599     6,069  .021285154   R-squared       =  
+>   0.0436
+-------------+----------------------------------   Adj R-squared   =  
+>   0.0431
+       Total |  135.068166     6,072  .022244428   Root MSE        =  
+>   .14589
+
+----------------------------------------------------------------------
+> --------
+tract_dvot~e | Coefficient  Std. err.      t    P>|t|     [95% conf. i
+> nterval]
+-------------+--------------------------------------------------------
+> --------
+perc_tract_a |  -.0149239   .0117918    -1.27   0.206      -.03804    
+> .0081922
+perc_tract_c |   .0220965   .0060568     3.65   0.000      .010223    
+>   .03397
+perc_tract_d |   .0859171   .0062336    13.78   0.000     .0736971    
+> .0981371
+       _cons |   .7580374   .0047995   157.94   0.000     .7486286    
+> .7674462
+----------------------------------------------------------------------
+> --------
+
+. 
+. esttab robustness2_* using "$OUTPUT_PATH/redlining_measure_robustnes
+> s.csv", se star(* 0.10 ** 0.05 *** 0.01) replace
+(output written to C:/Users/lijia/OneDrive - University of Toronto/Doc
+> uments/School/1-5 ECO375/ECO375 Project//3 - Output/redlining_measur
+> e_robustness.csv)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD46f8_000000.tmp"
+
+. drop _est_robustness*
+
+. 
+. * Robustness check -- does changing the way we measure redlining aff
+> ect results?
+. eststo robustness2_d: regress tract_dvoteshare perc_tract_d if tract
+> _holc_share > 0.9
+
+      Source |       SS           df       MS      Number of obs   =  
+>    6,073
+-------------+----------------------------------   F(1, 6071)      =  
+>   251.77
+       Model |  5.37830104         1  5.37830104   Prob > F        =  
+>   0.0000
+    Residual |  129.689865     6,071  .021362192   R-squared       =  
+>   0.0398
+-------------+----------------------------------   Adj R-squared   =  
+>   0.0397
+       Total |  135.068166     6,072  .022244428   Root MSE        =  
+>   .14616
+
+----------------------------------------------------------------------
+> --------
+tract_dvot~e | Coefficient  Std. err.      t    P>|t|     [95% conf. i
+> nterval]
+-------------+--------------------------------------------------------
+> --------
+perc_tract_d |   .0739926   .0046633    15.87   0.000      .064851    
+> .0831342
+       _cons |   .7706106   .0022841   337.39   0.000      .766133    
+> .7750881
+----------------------------------------------------------------------
+> --------
+
+. gen perc_tract_c_plus_d = perc_tract_c + perc_tract_d
+variable perc_tract_c_plus_d already defined
+r(110);
+
+end of do-file
+
+r(110);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD46f8_000000.tmp"
+
+. drop _est_robustness*
+
+. 
+. * Robustness check -- does changing the way we measure redlining aff
+> ect results?
+. eststo robustness2_d: regress tract_dvoteshare perc_tract_d if tract
+> _holc_share > 0.9
+
+      Source |       SS           df       MS      Number of obs   =  
+>    6,073
+-------------+----------------------------------   F(1, 6071)      =  
+>   251.77
+       Model |  5.37830104         1  5.37830104   Prob > F        =  
+>   0.0000
+    Residual |  129.689865     6,071  .021362192   R-squared       =  
+>   0.0398
+-------------+----------------------------------   Adj R-squared   =  
+>   0.0397
+       Total |  135.068166     6,072  .022244428   Root MSE        =  
+>   .14616
+
+----------------------------------------------------------------------
+> --------
+tract_dvot~e | Coefficient  Std. err.      t    P>|t|     [95% conf. i
+> nterval]
+-------------+--------------------------------------------------------
+> --------
+perc_tract_d |   .0739926   .0046633    15.87   0.000      .064851    
+> .0831342
+       _cons |   .7706106   .0022841   337.39   0.000      .766133    
+> .7750881
+----------------------------------------------------------------------
+> --------
+
+. gen perc_tract_c_plus_d = perc_tract_c + perc_tract_d
+variable perc_tract_c_plus_d already defined
+r(110);
+
+end of do-file
+
+r(110);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD46f8_000000.tmp"
+
+. drop _est_robustness*
+
+. 
+. * Robustness check -- does changing the way we measure redlining aff
+> ect results?
+. eststo robustness2_d: regress tract_dvoteshare perc_tract_d if tract
+> _holc_share > 0.9
+
+      Source |       SS           df       MS      Number of obs   =  
+>    6,073
+-------------+----------------------------------   F(1, 6071)      =  
+>   251.77
+       Model |  5.37830104         1  5.37830104   Prob > F        =  
+>   0.0000
+    Residual |  129.689865     6,071  .021362192   R-squared       =  
+>   0.0398
+-------------+----------------------------------   Adj R-squared   =  
+>   0.0397
+       Total |  135.068166     6,072  .022244428   Root MSE        =  
+>   .14616
+
+----------------------------------------------------------------------
+> --------
+tract_dvot~e | Coefficient  Std. err.      t    P>|t|     [95% conf. i
+> nterval]
+-------------+--------------------------------------------------------
+> --------
+perc_tract_d |   .0739926   .0046633    15.87   0.000      .064851    
+> .0831342
+       _cons |   .7706106   .0022841   337.39   0.000      .766133    
+> .7750881
+----------------------------------------------------------------------
+> --------
+
+. capture gen perc_tract_c_plus_d = perc_tract_c + perc_tract_d
+
+. eststo robustness2_c_plus_d: regress tract_dvoteshare perc_tract_c_p
+> lus_d if tract_holc_share > 0.9
+
+      Source |       SS           df       MS      Number of obs   =  
+>    6,073
+-------------+----------------------------------   F(1, 6071)      =  
+>   118.74
+       Model |  2.59114984         1  2.59114984   Prob > F        =  
+>   0.0000
+    Residual |  132.477016     6,071  .021821284   R-squared       =  
+>   0.0192
+-------------+----------------------------------   Adj R-squared   =  
+>   0.0190
+       Total |  135.068166     6,072  .022244428   Root MSE        =  
+>   .14772
+
+----------------------------------------------------------------------
+> --------
+tract_dvot~e | Coefficient  Std. err.      t    P>|t|     [95% conf. i
+> nterval]
+-------------+--------------------------------------------------------
+> --------
+perc_tra~s_d |    .053977   .0049534    10.90   0.000     .0442666    
+> .0636874
+       _cons |   .7517608   .0040934   183.65   0.000     .7437364    
+> .7597852
+----------------------------------------------------------------------
+> --------
+
+. eststo robustness2_c_and_d: regress tract_dvoteshare perc_tract_c pe
+> rc_tract_d if tract_holc_share > 0.9
+
+      Source |       SS           df       MS      Number of obs   =  
+>    6,073
+-------------+----------------------------------   F(2, 6070)      =  
+>   137.51
+       Model |  5.85447252         2  2.92723626   Prob > F        =  
+>   0.0000
+    Residual |  129.213693     6,070  .021287264   R-squared       =  
+>   0.0433
+-------------+----------------------------------   Adj R-squared   =  
+>   0.0430
+       Total |  135.068166     6,072  .022244428   Root MSE        =  
+>    .1459
+
+----------------------------------------------------------------------
+> --------
+tract_dvot~e | Coefficient  Std. err.      t    P>|t|     [95% conf. i
+> nterval]
+-------------+--------------------------------------------------------
+> --------
+perc_tract_c |   .0255588    .005404     4.73   0.000      .014965    
+> .0361527
+perc_tract_d |   .0892226   .0056603    15.76   0.000     .0781264    
+> .1003188
+       _cons |    .754778   .0040503   186.35   0.000      .746838    
+>  .762718
+----------------------------------------------------------------------
+> --------
+
+. eststo robustness2_b_c_d: regress tract_dvoteshare perc_tract_b perc
+> _tract_c perc_tract_d if tract_holc_share > 0.9
+
+      Source |       SS           df       MS      Number of obs   =  
+>    6,073
+-------------+----------------------------------   F(3, 6069)      =  
+>    93.76
+       Model |   5.9826695         3  1.99422317   Prob > F        =  
+>   0.0000
+    Residual |  129.085496     6,069  .021269648   R-squared       =  
+>   0.0443
+-------------+----------------------------------   Adj R-squared   =  
+>   0.0438
+       Total |  135.068166     6,072  .022244428   Root MSE        =  
+>   .14584
+
+----------------------------------------------------------------------
+> --------
+tract_dvot~e | Coefficient  Std. err.      t    P>|t|     [95% conf. i
+> nterval]
+-------------+--------------------------------------------------------
+> --------
+perc_tract_b |   .0285205   .0116171     2.46   0.014     .0057468    
+> .0512942
+perc_tract_c |   .0472331   .0103499     4.56   0.000     .0269435    
+> .0675226
+perc_tract_d |   .1112699   .0106142    10.48   0.000     .0904624    
+> .1320775
+       _cons |   .7330706   .0097248    75.38   0.000     .7140065    
+> .7521346
+----------------------------------------------------------------------
+> --------
+
+. 
+. esttab robustness2_* using "$OUTPUT_PATH/redlining_measure_robustnes
+> s.csv", se star(* 0.10 ** 0.05 *** 0.01) replace
+(output written to C:/Users/lijia/OneDrive - University of Toronto/Doc
+> uments/School/1-5 ECO375/ECO375 Project//3 - Output/redlining_measur
+> e_robustness.csv)
 
 . 
 end of do-file
