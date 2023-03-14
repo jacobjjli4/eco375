@@ -5,7 +5,7 @@ Name: 				Jia Jun (Jacob) Li 1006824750
 Name:				Benjamin Lee 1007236475
 
 Date Created: 		Feb 27 2023
-Last Updated:		Mar 10 2023
+Last Updated:		Mar 14 2023
 *******************************************************************************/
 
 // Directories for Jacob
@@ -52,6 +52,9 @@ eststo robustness2_b_c_d: regress tract_dvoteshare perc_tract_a perc_tract_c per
 
 esttab robustness2_* using "$OUTPUT_PATH/redlining_measure_robustness.csv", se star(* 0.10 ** 0.05 *** 0.01) replace
 
-
 noisily
+* Regression with covariates
+regress tract_dvoteshare perc_tract_d _yr_median perc_pop_white perc_pop_black ///
+perc_pop_asian if tract_holc_share > 0.8, robust
+
 log close
