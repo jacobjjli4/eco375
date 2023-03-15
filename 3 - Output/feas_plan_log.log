@@ -1,90 +1,46 @@
-----------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
       name:  <unnamed>
-       log:  C:/Users/lijia/OneDrive - University of Toronto/Documents
-> /School/1-5 ECO375/ECO375 Project//3 - Output/feas_plan_log.log
+       log:  C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/feas_plan_log.log
   log type:  text
- opened on:  14 Mar 2023, 16:57:27
+ opened on:  14 Mar 2023, 20:57:12
 
 . 
 . cd "$INPUT_PATH/Merge"
-C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 E
-> CO375\ECO375 Project\1 - Data\Merge
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 ECO375\ECO375 Project\1 - Data\Merge
 
 . 
-. * Load collapsed data for regression
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD2494_000000.tmp"
+
 . use "HOLC_Voting_Merged.dta", clear
 
 . 
 end of do-file
 
-. do "C:\Users\lijia\AppData\Local\Temp\STD6cd4_000000.tmp"
+. do "C:\Users\lijia\AppData\Local\Temp\STD2494_000000.tmp"
 
-. * Regression with covariates
-. regress tract_dvoteshare perc_tract_d _yr_median perc_pop_white perc
-> _pop_black ///
-> perc_pop_asian if tract_holc_share > 0.8, robust
-
-Linear regression                               Number of obs     =   
->    7,431
-                                                F(5, 7425)        =   
->  1604.16
-                                                Prob > F          =   
->   0.0000
-                                                R-squared         =   
->   0.3912
-                                                Root MSE          =   
->   .11653
-
-----------------------------------------------------------------------
-> --------
-             |               Robust
-tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. i
-> nterval]
--------------+--------------------------------------------------------
-> --------
-perc_tract_d |   .0339018   .0032339    10.48   0.000     .0275624    
-> .0402411
-  _yr_median |   .0000383   2.16e-06    17.73   0.000     .0000341    
-> .0000426
-perc_pop_w~e |  -.1384619   .0068289   -20.28   0.000    -.1518485   -
-> .1250753
-perc_pop_b~k |   .1994878   .0044117    45.22   0.000     .1908397    
-> .2081359
-perc_pop_a~n |  -.0670187   .0106753    -6.28   0.000    -.0879454    
-> -.046092
-       _cons |   .7354597   .0046131   159.43   0.000     .7264167    
-> .7445026
-----------------------------------------------------------------------
-> --------
-
-. 
-end of do-file
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD6cd4_000000.tmp"
-
-. * Regression with covariates
 . regress tract_dvoteshare perc_tract_d _yr_median perc_pop_white perc_pop_black ///
 > perc_pop_asian if tract_holc_share > 0.8, robust
 
-Linear regression                               Number of obs     =      7,431
-                                                F(5, 7425)        =    1604.16
+Linear regression                               Number of obs     =      7,375
+                                                F(5, 7369)        =    1701.02
                                                 Prob > F          =     0.0000
-                                                R-squared         =     0.3912
-                                                Root MSE          =     .11653
+                                                R-squared         =     0.4301
+                                                Root MSE          =     .11262
 
 --------------------------------------------------------------------------------
                |               Robust
 tract_dvotes~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
 ---------------+----------------------------------------------------------------
-  perc_tract_d |   .0339018   .0032339    10.48   0.000     .0275624    .0402411
-    _yr_median |   .0000383   2.16e-06    17.73   0.000     .0000341    .0000426
-perc_pop_white |  -.1384619   .0068289   -20.28   0.000    -.1518485   -.1250753
-perc_pop_black |   .1994878   .0044117    45.22   0.000     .1908397    .2081359
-perc_pop_asian |  -.0670187   .0106753    -6.28   0.000    -.0879454    -.046092
-         _cons |   .7354597   .0046131   159.43   0.000     .7264167    .7445026
+  perc_tract_d |   .0380467   .0029936    12.71   0.000     .0321783    .0439151
+    _yr_median |   1.23e-06   5.47e-08    22.45   0.000     1.12e-06    1.34e-06
+perc_pop_white |  -.2052477   .0074982   -27.37   0.000    -.2199462   -.1905491
+perc_pop_black |   .1929972    .004312    44.76   0.000     .1845443      .20145
+perc_pop_asian |  -.1378559   .0109387   -12.60   0.000    -.1592988    -.116413
+         _cons |   .7427724   .0041657   178.31   0.000     .7346065    .7509383
 --------------------------------------------------------------------------------
 
 . 
 end of do-file
 
-. exit, clear
