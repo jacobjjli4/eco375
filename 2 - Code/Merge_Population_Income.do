@@ -45,7 +45,7 @@ save "cleaned_Tract Level Income Data (2020)", replace
 cd "$INPUT_PATH/Merge"
 use "HOLC_Voting_Merged.dta", clear
 
-capture drop _merge
+capture drop _merge pop_* _yr_median margin_error perc_pop*
 merge 1:1 tract_code using "$INPUT_PATH/Covariates/cleaned_Census Tract Population Data (2020)"
 drop if _merge == 2
 
@@ -54,7 +54,6 @@ merge 1:1 tract_code using "$INPUT_PATH/Covariates/cleaned_Tract Level Income Da
 drop if _merge == 2
 
 * generate race proportion data
-capture drop perc_pop*
 foreach var of varlist pop_white pop_black pop_asian {
 	gen perc_`var' = `var' / pop_total
 }
