@@ -1,0 +1,28 @@
+2023-03-19 Planning Meeting
+Phase 0:
+- Finish literature review (Ben)
+
+Phase 1 (finish by Fri. Mar. 24):
+- Add more data (Ben)
+	- Voting age population data (can likely back that out due to Census population data being for 18+)
+	- more covariates:
+		- median educational attainment
+		- median age
+		- computer/internet use (optional)
+		- industry/occupation/class of worker
+		- etc.
+- Test alternative specifications (Jacob)
+	- perc_tract_d model AND perc_tract_c and perc_tract_d model (with covariates) 
+	- fixed effects model at either the state or the city level (test both)
+- set up final product document (Jacob)
+	- set up LaTeX document for figures and tables
+
+Phase 2 (finish by deadline: Tuesday, Mar. 28):
+- create & add figures (Jacob)
+	- scatter of perc_tract_d and dem_vote_share
+	- scatter of perc_tract_d and turnout
+	- sample city HOLC map (from redlining source)
+- create & add tables (Jacob)
+	- summary statistics of all our variables
+	- regression output tables
+- write (to be decided once we start writing)
