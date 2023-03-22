@@ -25,7 +25,7 @@ global INPUT_PATH "$PATH/1 - Data"
 // global INPUT_PATH "$PATH/1 - Data"
 
 capture log close
-log using "$OUTPUT_PATH/jacob_test_log", replace text
+log using "$OUTPUT_PATH/merge_covariates_log", replace text
 
 
 * Prepare race data for merge

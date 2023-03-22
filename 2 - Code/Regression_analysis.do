@@ -23,7 +23,7 @@ cd "$OUTPUT_PATH"
 clear all
 set linesize 240
 capture log close
-log using "$OUTPUT_PATH/feas_plan_log", replace text
+log using "$OUTPUT_PATH/regression_analysis_log", replace text
 
 cd "$INPUT_PATH/Merge"
 
