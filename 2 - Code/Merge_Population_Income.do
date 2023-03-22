@@ -59,22 +59,23 @@ drop GEO_ID-pop_total
 
 save "cleaned_Education Data", replace
 
-* Merge race and income data into HOLC voting data
+* MERGE covariates
 cd "$INPUT_PATH/Merge"
 use "HOLC_Voting_Merged.dta", clear
 
-capture drop _merge pop_* _yr_median margin_error perc_pop*
-merge 1:1 tract_code using "$INPUT_PATH/Covariates/cleaned_Census Tract Population Data (2020)"
-drop if _merge == 2
-
-capture drop _merge
-merge 1:1 tract_code using "$INPUT_PATH/Covariates/cleaned_Tract Level Income Data (2020)"
-drop if _merge == 2
+foreach file in "cleaned_Census Tract Population Data (2020).dta" \\\
+	"cleaned_Tract Level Income Data (2020)" \\\
+	"cleaned_Age and Sex Data" \\\
+	"cleaned_Education Data"{
+	capture drop _merge
+	merge 1:1 tract_code using "$INPUT_PATH/Covariates/`file'"
+	drop if _merge ==2
+}
 
 * generate race proportion data
 foreach var of varlist pop_white pop_black pop_asian {
 	gen perc_`var' = `var' / pop_total
 }
 
-save "$INPUT_PATH/Merge/HOLC_Voting_Merged.dta", replace
+save "$INPUT_PATH/Merge/HOLC_Voting_Covariates.dta", replace
 

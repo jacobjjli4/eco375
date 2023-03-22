@@ -1738,3 +1738,127 @@ file cleaned_Education Data.dta saved
 . 
 end of do-file
 
+. help foreach
+
+. help foreach
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD289c_000000.tmp"
+
+. cd "$INPUT_PATH/Merge"
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 E
+> CO375\ECO375 Project\1 - Data\Merge
+
+. use "HOLC_Voting_Merged.dta", clear
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD289c_000000.tmp"
+
+. foreach file in "cleaned_Census Tract Population Data (2020).dta" {
+  2.         merge 1:1 tract_code using "$INPUT_PATH/Covariates/`file'
+> "
+  3. }
+variable _merge already defined
+r(110);
+
+end of do-file
+
+r(110);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD289c_000000.tmp"
+
+. foreach file in "cleaned_Census Tract Population Data (2020).dta" {
+  2.         capture drop _merge
+  3.         merge 1:1 tract_code using "$INPUT_PATH/Covariates/`file'
+> "
+  4. }
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        68,813
+        from master                         0  (_merge==1)
+        from using                     68,813  (_merge==2)
+
+    Matched                            16,582  (_merge==3)
+    -----------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD289c_000000.tmp"
+
+. foreach file in "cleaned_Census Tract Population Data (2020).dta" {
+  2.         capture drop _merge
+  3.         merge 1:1 tract_code using "$INPUT_PATH/Covariates/`file'
+> "
+  4.         drop if _merge ==2
+  5. }
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             0
+    Matched                            85,395  (_merge==3)
+    -----------------------------------------
+(0 observations deleted)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD289c_000000.tmp"
+
+. cd "$INPUT_PATH/Merge"
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 E
+> CO375\ECO375 Project\1 - Data\Merge
+
+. use "HOLC_Voting_Merged.dta", clear
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD289c_000000.tmp"
+
+. foreach file in "cleaned_Census Tract Population Data (2020).dta" {
+  2.         capture drop _merge
+  3.         merge 1:1 tract_code using "$INPUT_PATH/Covariates/`file'
+> "
+  4.         drop if _merge ==2
+  5. }
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        68,813
+        from master                         0  (_merge==1)
+        from using                     68,813  (_merge==2)
+
+    Matched                            16,582  (_merge==3)
+    -----------------------------------------
+(68,813 observations deleted)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD289c_000000.tmp"
+
+. cd "$INPUT_PATH/Merge"
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 E
+> CO375\ECO375 Project\1 - Data\Merge
+
+. use "HOLC_Voting_Merged.dta", clear
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD289c_000000.tmp"
+
+. cd "$INPUT_PATH/Merge"
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 E
+> CO375\ECO375 Project\1 - Data\Merge
+
+. use "HOLC_Voting_Merged.dta", clear
+
+. 
+end of do-file
+
+. br
+

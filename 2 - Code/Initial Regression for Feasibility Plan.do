@@ -62,6 +62,8 @@ encode city, generate(city2)
 encode state, generate(state2)
 
 regress tract_dvoteshare perc_tract_d _yr_median perc_pop_white perc_pop_black ///
-perc_pop_asian i.city if tract_holc_share > 0.9, robust
+perc_pop_asian i.city2 if tract_holc_share > 0.9, cluster(city2)
+regress tract_dvoteshare perc_tract_d _yr_median perc_pop_white perc_pop_black ///
+perc_pop_asian i.state2 if tract_holc_share > 0.9, robust
 
 log close
