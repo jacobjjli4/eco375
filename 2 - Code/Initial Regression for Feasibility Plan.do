@@ -20,6 +20,8 @@ global INPUT_PATH "$PATH/1 - Data"
 
 cd "$OUTPUT_PATH"
 
+clear all
+set linesize 240
 capture log close
 log using "$OUTPUT_PATH/feas_plan_log", replace text
 
@@ -53,17 +55,30 @@ eststo robustness2_b_c_d: regress tract_dvoteshare perc_tract_a perc_tract_c per
 esttab robustness2_* using "$OUTPUT_PATH/redlining_measure_robustness.csv", se star(* 0.10 ** 0.05 *** 0.01) replace
 
 noisily
-* Regression with covariates
+* Regression with selected covariates
 regress tract_dvoteshare perc_tract_d _yr_median perc_pop_white perc_pop_black ///
 perc_pop_asian if tract_holc_share > 0.9, robust
 
-* Regression with covariates and city fixed effects
+* Regression with selected covariates and city fixed effects
 encode city, generate(city2)
-encode state, generate(state2)
+gen perc_tract_d_sq = perc_tract_d^2
+gen perc_tract_d_cu = perc_tract_d^3
+#delimit ;
+regress tract_dvoteshare perc_tract_d _yr_median
+perc_pop_white perc_pop_black perc_pop_asian median_age i.city2 
+if tract_holc_share > 0.9, cluster(city2);
 
-regress tract_dvoteshare perc_tract_d _yr_median perc_pop_white perc_pop_black ///
-perc_pop_asian i.city2 if tract_holc_share > 0.9, cluster(city2)
-regress tract_dvoteshare perc_tract_d _yr_median perc_pop_white perc_pop_black ///
-perc_pop_asian i.state2 if tract_holc_share > 0.9, robust
+regress tract_dvoteshare perc_tract_d perc_tract_d_sq _yr_median
+perc_pop_white perc_pop_black perc_pop_asian median_age i.city2 
+if tract_holc_share > 0.9, cluster(city2);
+
+regress tract_dvoteshare perc_tract_d perc_tract_d_sq perc_tract_d_cu _yr_median perc_pop_white perc_pop_black perc_pop_asian median_age i.city2 if tract_holc_share > 0.9, cluster(city2);
+
+regress tract_dvoteshare log_perc_tract_d _yr_median
+perc_pop_white perc_pop_black perc_pop_asian median_age i.city2 
+if tract_holc_share > 0.9, cluster(city2);
+#delimit cr
+
+gen log_perc_tract_d = log(perc_tract_d)
 
 log close
