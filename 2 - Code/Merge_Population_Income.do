@@ -41,6 +41,24 @@ gen tract_code = substr(GEO_ID, 10, 13)
 
 save "cleaned_Tract Level Income Data (2020)", replace
 
+* Prepare age and sex data for merge
+import excel "Age and Sex Data.xlsx", firstrow clear
+gen tract_code = substr(GEO_ID, 10, 13)
+drop GEO_ID NAME-age_over_65
+
+save "cleaned_Age and Sex Data", replace
+
+* Prepare education data for merge
+import excel "Cleaned Education Data.xlsx", firstrow clear
+* generate education proportion data
+foreach var of varlist less_hs_total-bach_total {
+	gen perc_`var' = `var' / pop_total
+}
+gen tract_code = substr(GEO_ID, 10, 13)
+drop GEO_ID-pop_total
+
+save "cleaned_Education Data", replace
+
 * Merge race and income data into HOLC voting data
 cd "$INPUT_PATH/Merge"
 use "HOLC_Voting_Merged.dta", clear
