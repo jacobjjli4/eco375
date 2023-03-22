@@ -55,6 +55,13 @@ esttab robustness2_* using "$OUTPUT_PATH/redlining_measure_robustness.csv", se s
 noisily
 * Regression with covariates
 regress tract_dvoteshare perc_tract_d _yr_median perc_pop_white perc_pop_black ///
-perc_pop_asian if tract_holc_share > 0.8, robust
+perc_pop_asian if tract_holc_share > 0.9, robust
+
+* Regression with covariates and city fixed effects
+encode city, generate(city2)
+encode state, generate(state2)
+
+regress tract_dvoteshare perc_tract_d _yr_median perc_pop_white perc_pop_black ///
+perc_pop_asian i.city if tract_holc_share > 0.9, robust
 
 log close
