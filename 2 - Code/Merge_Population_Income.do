@@ -45,6 +45,9 @@ save "cleaned_Tract Level Income Data (2020)", replace
 import excel "Age and Sex Data.xlsx", firstrow clear
 gen tract_code = substr(GEO_ID, 10, 13)
 drop GEO_ID NAME-age_over_65
+drop if median_age == "-"
+drop if male_female_ratio == "-"
+destring male_female_ratio median_age, replace
 
 save "cleaned_Age and Sex Data", replace
 
