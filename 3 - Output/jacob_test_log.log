@@ -1,96 +1,182 @@
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------
       name:  <unnamed>
-       log:  C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/jacob_test_log.log
+       log:  C:/Users/lijia/OneDrive - University of Toronto/Documents
+> /School/1-5 ECO375/ECO375 Project//3 - Output/jacob_test_log.log
   log type:  text
- opened on:  14 Mar 2023, 20:54:29
+ opened on:  22 Mar 2023, 15:01:49
 
 . 
-. 
-. * Prepare race data for merge
-. cd "$INPUT_PATH/Covariates"
-C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 ECO375\ECO375 Project\1 - Data\Covariates
-
-. import excel "Census Tract Population Data (2020).xlsx", firstrow clear
-(5 vars, 85,395 obs)
-
-. gen tract_code = substr(GEO_ID, 10, 13)
-
-. 
-. save "cleaned_Census Tract Population Data (2020)", replace
-file cleaned_Census Tract Population Data (2020).dta saved
-
-. 
-. * Prepare income data for merge
-. import excel "Tract Level Income Data (2020).xlsx", firstrow clear
-(2 vars, 85,395 obs)
-
-. gen tract_code = substr(GEO_ID, 10, 13)
-
-. 
-. save "cleaned_Tract Level Income Data (2020)", replace
-file cleaned_Tract Level Income Data (2020).dta saved
-
-. 
-. * Merge race and income data into HOLC voting data
-. cd "$INPUT_PATH/Merge"
+. cd "$INPUT_PATH/Tracts_2020_HOLC"
 C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 E
-> CO375\ECO375 Project\1 - Data\Merge
-
-. use "HOLC_Voting_Merged.dta", clear
+> CO375\ECO375 Project\1 - Data\Tracts_2020_HOLC
 
 . 
-end of do-file
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD2494_000000.tmp"
-
-. capture drop _merge pop_* _yr_median margin_error perc_pop*
+. * convert shapefile of HOLC to census tract crosswalk into dta forma
+> t
+. shp2dta using Tracts_2020_HOLC, database(Tracts_2020_HOLC) ///
+>         coordinates(Tracts_2020_HOLC_coord) genid(id) replace
+type: 5
 
 . 
-end of do-file
+. * load dta created above
+. use Tracts_2020_HOLC.dta
 
-. do "C:\Users\lijia\AppData\Local\Temp\STD2494_000000.tmp"
+. 
+. * clean data by removing extra 0s in the tract codes present in the 
+> original dataset
+. gen tract_code1 = substr(GISJOIN, 2, 2)
 
-. merge 1:1 tract_code using "$INPUT_PATH/Covariates/cleaned_Census Tr
-> act Population Data (2020)"
+. gen tract_code2 = substr(GISJOIN, 5, 3)
+
+. gen tract_code3 = substr(GISJOIN, 9, 6)
+
+. egen tract_code = concat(tract_code*)
+
+. drop tract_code1-tract_code3
+
+. 
+. egen perc_tract_a = total(SUM_Perc) if FIRST_holc == "A", by(tract_c
+> ode)
+(38,481 missing values generated)
+
+. egen perc_tract_b = total(SUM_Perc) if FIRST_holc == "B", by(tract_c
+> ode)
+(32,395 missing values generated)
+
+. egen perc_tract_c = total(SUM_Perc) if FIRST_holc == "C", by(tract_c
+> ode)
+(24,027 missing values generated)
+
+. egen perc_tract_d = total(SUM_Perc) if FIRST_holc == "D", by(tract_c
+> ode)
+(31,338 missing values generated)
+
+. 
+. foreach var in perc_tract_a perc_tract_b perc_tract_c perc_tract_d {
+  2.         replace `var' = 0 if `var' == .
+  3.         replace `var' = 1 if `var' > 1
+  4. }
+(38,481 real changes made)
+(0 real changes made)
+(32,395 real changes made)
+(12 real changes made)
+(24,027 real changes made)
+(132 real changes made)
+(31,338 real changes made)
+(52 real changes made)
+
+. 
+. 
+. save "Tracts_2020_HOLC_cleaned.dta", replace
+file Tracts_2020_HOLC_cleaned.dta saved
+
+. 
+. * import and clean voting data
+. cd "$INPUT_PATH/Voting_census_block"
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 E
+> CO375\ECO375 Project\1 - Data\Voting_census_block
+
+. clear all
+
+. import delimited "2021blockgroupvoting.csv"
+(encoding automatically selected: ISO-8859-1)
+(9 vars, 233,866 obs)
+
+. tostring blockgroup_geoid, replace format("%14.0f")
+blockgroup_geoid was double now str12
+
+. 
+. replace blockgroup_geoid = "0" + blockgroup_geoid if strlen(blockgro
+> up_geoid)==11
+(43,877 real changes made)
+
+. gen tract_code = substr(blockgroup_geoid, 1, 11)
+
+. 
+. egen tract_dem_total = total(dem), by(tract_code)
+
+. egen tract_rep_total = total(rep), by(tract_code)
+
+. egen tract_lib_total = total(lib), by(tract_code)
+
+. egen tract_oth_total = total(oth), by(tract_code)
+
+. gen tract_vote_total = tract_dem_total + tract_rep_total + tract_lib
+> _total + tract_oth_total
+
+. gen tract_dvoteshare = tract_dem_total / tract_vote_total
+(145 missing values generated)
+
+. gen tract_rvoteshare = tract_rep_total / tract_vote_total
+(145 missing values generated)
+
+. duplicates drop tract_code, force
+
+Duplicates in terms of tract_code
+
+(151,546 observations deleted)
+
+. 
+. drop rep-precincts
+
+. drop blockgroup_geoid
+
+. 
+. save 2021blockgroupvoting_cleaned, replace
+file 2021blockgroupvoting_cleaned.dta saved
+
+. 
+. * collapse HOLC data to tract level units of observation
+. use "$INPUT_PATH/Tracts_2020_HOLC/Tracts_2020_HOLC_cleaned.dta"
+
+. preserve
+
+. collapse (max) perc_tract_* (first) GISJOIN MAX_city MAX_state , by(
+> tract_code)
+
+. save "$INPUT_PATH/Tracts_2020_HOLC/HOLC_collapsed.dta", replace
+file C:/Users/lijia/OneDrive - University of
+    Toronto/Documents/School/1-5 ECO375/ECO375 Project//1 -
+    Data/Tracts_2020_HOLC/HOLC_collapsed.dta saved
+
+. 
+. restore
+
+. 
+. * merge datasets
+. clear all
+
+. use "$INPUT_PATH/Tracts_2020_HOLC/HOLC_collapsed.dta"
+
+. merge m:1 tract_code using "$INPUT_PATH/Voting_census_block/2021bloc
+> kgroupvoting_cleaned.dta"
 
     Result                      Number of obs
     -----------------------------------------
-    Not matched                        68,813
-        from master                         0  (_merge==1)
-        from using                     68,813  (_merge==2)
+    Not matched                        66,187
+        from master                       230  (_merge==1)
+        from using                     65,957  (_merge==2)
 
-    Matched                            16,582  (_merge==3)
+    Matched                            16,363  (_merge==3)
     -----------------------------------------
 
-. drop if _merge == 2
-(68,813 observations deleted)
+. * Three states did not report their results at the precinct level: S
+> outh Dakota, Kentucky and West Virginia.
+. 
+. * clean merged dataset
+. drop GISJOIN MAX_state
+
+. rename MAX_city city
 
 . 
-. capture drop _merge
+. * remove census tracts that are not matched with HOLC tracts
+. egen tract_holc_share = rowtotal(perc_tract_*)
 
-. merge 1:1 tract_code using "$INPUT_PATH/Covariates/cleaned_Tract Lev
-> el Income Data (2020)"
+. drop if tract_holc_share == 0
+(65,957 observations deleted)
 
-    Result                      Number of obs
-    -----------------------------------------
-    Not matched                        68,813
-        from master                         0  (_merge==1)
-        from using                     68,813  (_merge==2)
-
-    Matched                            16,582  (_merge==3)
-    -----------------------------------------
-
-. drop if _merge == 2
-(68,813 observations deleted)
-
-. 
-. * generate race proportion data
-. foreach var of varlist pop_white pop_black pop_asian {
-  2.         gen perc_`var' = `var' / pop_total
-  3. }
-(67 missing values generated)
-(67 missing values generated)
-(67 missing values generated)
+. drop if tract_holc_share > 1.05
+(11 observations deleted)
 
 . 
 . save "$INPUT_PATH/Merge/HOLC_Voting_Merged.dta", replace
@@ -101,87 +187,145 @@ file C:/Users/lijia/OneDrive - University of
 . 
 end of do-file
 
-. br
+. do "C:\Users\lijia\AppData\Local\Temp\STD289c_000000.tmp"
 
-. do "C:\Users\lijia\AppData\Local\Temp\STD2494_000000.tmp"
+. cd "$INPUT_PATH/Merge"
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 E
+> CO375\ECO375 Project\1 - Data\Merge
 
-. regress tract_dvoteshare perc_tract_d _yr_median perc_pop_white perc
-> _pop_black ///
-> perc_pop_asian if tract_holc_share > 0.8, robust
+. use "HOLC_Voting_Merged.dta", clear
 
-Linear regression                               Number of obs     =   
->    7,375
-                                                F(5, 7369)        =   
->  1701.02
-                                                Prob > F          =   
->   0.0000
-                                                R-squared         =   
->   0.4301
-                                                Root MSE          =   
->   .11262
+. 
+. foreach file in "cleaned_Census Tract Population Data (2020).dta" \\
+> \
+{ required
+r(100);
 
-----------------------------------------------------------------------
-> --------
-             |               Robust
-tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. i
-> nterval]
--------------+--------------------------------------------------------
-> --------
-perc_tract_d |   .0380467   .0029936    12.71   0.000     .0321783    
-> .0439151
-  _yr_median |   1.23e-06   5.47e-08    22.45   0.000     1.12e-06    
-> 1.34e-06
-perc_pop_w~e |  -.2052477   .0074982   -27.37   0.000    -.2199462   -
-> .1905491
-perc_pop_b~k |   .1929972    .004312    44.76   0.000     .1845443    
->   .20145
-perc_pop_a~n |  -.1378559   .0109387   -12.60   0.000    -.1592988    
-> -.116413
-       _cons |   .7427724   .0041657   178.31   0.000     .7346065    
-> .7509383
-----------------------------------------------------------------------
-> --------
+end of do-file
+
+r(100);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD289c_000000.tmp"
+
+. cd "$INPUT_PATH/Merge"
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 E
+> CO375\ECO375 Project\1 - Data\Merge
+
+. use "HOLC_Voting_Merged.dta", clear
+
+. 
+. foreach file in "cleaned_Census Tract Population Data (2020).dta" \\
+> \
+{ required
+r(100);
+
+end of do-file
+
+r(100);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD289c_000000.tmp"
+
+. cd "$INPUT_PATH/Merge"
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 E
+> CO375\ECO375 Project\1 - Data\Merge
+
+. use "HOLC_Voting_Merged.dta", clear
 
 . 
 end of do-file
 
-. do "C:\Users\lijia\AppData\Local\Temp\STD2494_000000.tmp"
+. do "C:\Users\lijia\AppData\Local\Temp\STD289c_000000.tmp"
 
-. regress tract_dvoteshare perc_tract_d _yr_median perc_pop_white perc_pop_black ///
-> perc_pop_asian if tract_holc_share > 0.8, robust
+. foreach file in "cleaned_Census Tract Population Data (2020).dta" \\
+> \
+{ required
+r(100);
 
-Linear regression                               Number of obs     =      7,375
-                                                F(5, 7369)        =    1701.02
-                                                Prob > F          =     0.0000
-                                                R-squared         =     0.4301
-                                                Root MSE          =     .11262
+end of do-file
 
---------------------------------------------------------------------------------
-               |               Robust
-tract_dvotes~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
----------------+----------------------------------------------------------------
-  perc_tract_d |   .0380467   .0029936    12.71   0.000     .0321783    .0439151
-    _yr_median |   1.23e-06   5.47e-08    22.45   0.000     1.12e-06    1.34e-06
-perc_pop_white |  -.2052477   .0074982   -27.37   0.000    -.2199462   -.1905491
-perc_pop_black |   .1929972    .004312    44.76   0.000     .1845443      .20145
-perc_pop_asian |  -.1378559   .0109387   -12.60   0.000    -.1592988    -.116413
-         _cons |   .7427724   .0041657   178.31   0.000     .7346065    .7509383
---------------------------------------------------------------------------------
+r(100);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD289c_000000.tmp"
+
+. foreach file in "cleaned_Census Tract Population Data (2020).dta" "c
+> leaned_Tract Level Income Data (2020)" "cleaned_Age and Sex Data" "c
+> leaned_Education Data" {
+  2.         capture drop _merge
+  3.         merge 1:1 tract_code using "$INPUT_PATH/Covariates/`file'
+> "
+  4.         drop if _merge == 2
+  5. }
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        68,813
+        from master                         0  (_merge==1)
+        from using                     68,813  (_merge==2)
+
+    Matched                            16,582  (_merge==3)
+    -----------------------------------------
+(68,813 observations deleted)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        68,813
+        from master                         0  (_merge==1)
+        from using                     68,813  (_merge==2)
+
+    Matched                            16,582  (_merge==3)
+    -----------------------------------------
+(68,813 observations deleted)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        68,813
+        from master                         0  (_merge==1)
+        from using                     68,813  (_merge==2)
+
+    Matched                            16,582  (_merge==3)
+    -----------------------------------------
+(68,813 observations deleted)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        68,813
+        from master                         0  (_merge==1)
+        from using                     68,813  (_merge==2)
+
+    Matched                            16,582  (_merge==3)
+    -----------------------------------------
+(68,813 observations deleted)
 
 . 
 end of do-file
 
-. do "C:\Users\lijia\AppData\Local\Temp\STD2494_000000.tmp"
+. do "C:\Users\lijia\AppData\Local\Temp\STD289c_000000.tmp"
 
-. save "$INPUT_PATH/Merge/HOLC_Voting_Merged.dta", replace
-file C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//1 - Data/Merge/HOLC_Voting_Merged.dta saved
+. * generate race proportion data
+. foreach var of varlist pop_white pop_black pop_asian {
+  2.         gen perc_`var' = `var' / pop_total
+  3. }
+(67 missing values generated)
+(67 missing values generated)
+(67 missing values generated)
+
+. 
+. save "$INPUT_PATH/Merge/HOLC_Voting_Covariates.dta", replace
+(file C:/Users/lijia/OneDrive - University of
+    Toronto/Documents/School/1-5 ECO375/ECO375 Project//1 -
+    Data/Merge/HOLC_Voting_Covariates.dta not found)
+file C:/Users/lijia/OneDrive - University of
+    Toronto/Documents/School/1-5 ECO375/ECO375 Project//1 -
+    Data/Merge/HOLC_Voting_Covariates.dta saved
 
 . 
 end of do-file
 
-. do "C:\Users\lijia\AppData\Local\Temp\STD2494_000000.tmp"
+. do "C:\Users\lijia\AppData\Local\Temp\STD289c_000000.tmp"
 
-. global PATH "C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project/"
+. // Directories for Jacob
+. global PATH "C:/Users/lijia/OneDrive - University of Toronto/Documen
+> ts/School/1-5 ECO375/ECO375 Project/"
 
 . global OUTPUT_PATH "$PATH/3 - Output"
 
@@ -194,7 +338,8 @@ end of do-file
 . // global INPUT_PATH "$PATH/1 - Data"
 . 
 . cd "$OUTPUT_PATH"
-C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 ECO375\ECO375 Project\3 - Output
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 E
+> CO375\ECO375 Project\3 - Output
 
 . 
 . capture log close

@@ -63,13 +63,10 @@ save "cleaned_Education Data", replace
 cd "$INPUT_PATH/Merge"
 use "HOLC_Voting_Merged.dta", clear
 
-foreach file in "cleaned_Census Tract Population Data (2020).dta" \\\
-	"cleaned_Tract Level Income Data (2020)" \\\
-	"cleaned_Age and Sex Data" \\\
-	"cleaned_Education Data"{
+foreach file in "cleaned_Census Tract Population Data (2020).dta" "cleaned_Tract Level Income Data (2020)" "cleaned_Age and Sex Data" "cleaned_Education Data" {
 	capture drop _merge
 	merge 1:1 tract_code using "$INPUT_PATH/Covariates/`file'"
-	drop if _merge ==2
+	drop if _merge == 2
 }
 
 * generate race proportion data
