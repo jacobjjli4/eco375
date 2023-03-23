@@ -29,33 +29,40 @@ cd "$INPUT_PATH/Merge"
 
 * Load collapsed data for regression
 use "HOLC_Voting_Covariates.dta", clear
+drop _merge
+replace _yr_median = _yr_median / 1000
+
 
 * label dataset
-label variable perc_tract_a "Grade A percentage"
-label variable perc_tract_b "Grade B percentage"
-label variable perc_tract_c "Grade C percentage"
-label variable perc_tract_d "Grade D percentage"
+foreach var of varlist perc_tract_a-perc_tract_d{
+	local name = "Grade " + strupper(substr("`var'", 12, 1)) + " share"
+	label variable `var' "`name'" 
+}
 label variable city "City"
 label variable state "State"
-label variable tract_dvoteshare "Democrat vote share"
-label variable _yr_median "Median income"
+label variable tract_dvoteshare "Dem vote share"
+label variable _yr_median "Median income ('000s)"
 label variable median_age "Median age"
-label variable male_female_ratio "Male-to-female ratio"
-label variable perc_less_hs_total "Less HS percentage"
-label variable perc_hs_total "HS percentage"
-label variable perc_somecol_total "Some college percentage"
-label variable perc_bach_total "Bachelor's percentage"
-label variable perc_pop_white "White percentage"
-label variable perc_pop_black "Black percentage"
-label variable perc_pop_asian "Asian percentage"
+label variable male_female_ratio "M-F ratio"
+label variable perc_less_hs_total "Less HS share"
+label variable perc_hs_total "HS share"
+label variable perc_somecol_total "Some college share"
+label variable perc_bach_total "Bachelor's share"
+label variable perc_pop_white "White share"
+label variable perc_pop_black "Black share"
+label variable perc_pop_asian "Asian share"
 
 * Scatter plot
 twoway(scatter tract_dvoteshare perc_tract_d if tract_holc_share > 0.9)
 graph export "$OUTPUT_PATH\baseline_scatter.png", as(png) replace
 
+* Generate summary statistics
+sum perc_tract_d tract_dvoteshare median_age male_female_ratio perc_hs_total-perc_pop_asian
 
 * Regression
 eststo reg_baseline: regress tract_dvoteshare perc_tract_d if tract_holc_share > 0.9, robust
+esttab reg_baseline using "$OUTPUT_PATH/base_regression.tex", ///
+se star(* 0.10 ** 	0.05 *** 0.01) replace booktabs label
 
 
 * Robustness check -- does changing the tract_holc_share cutoff affect results?
@@ -90,14 +97,14 @@ label variable perc_tract_d_cu "Grade D cubed"
 
 #delimit ;
 eststo reg_linear: regress tract_dvoteshare perc_tract_d _yr_median
-perc_pop_white perc_pop_black perc_pop_asian median_age i.city2 
+perc_hs_total-perc_pop_asian median_age i.city2 
 if tract_holc_share > 0.9, cluster(city2);
 
 eststo reg_quad: regress tract_dvoteshare perc_tract_d perc_tract_d_sq _yr_median
-perc_pop_white perc_pop_black perc_pop_asian median_age i.city2 
+perc_hs_total-perc_pop_asian  median_age i.city2 
 if tract_holc_share > 0.9, cluster(city2);
 
-eststo reg_cube: regress tract_dvoteshare perc_tract_d perc_tract_d_sq perc_tract_d_cu _yr_median perc_pop_white perc_pop_black perc_pop_asian median_age i.city2 if tract_holc_share > 0.9, cluster(city2);
+eststo reg_cube: regress tract_dvoteshare perc_tract_d perc_tract_d_sq perc_tract_d_cu _yr_median perc_hs_total-perc_pop_asian median_age i.city2 if tract_holc_share > 0.9, cluster(city2);
 #delimit cr
 #delimit ;
 esttab reg_* using "$OUTPUT_PATH/main_regressions.tex", 

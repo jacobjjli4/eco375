@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/regression_analysis_log.log
   log type:  text
- opened on:  23 Mar 2023, 10:44:48
+ opened on:  23 Mar 2023, 15:02:48
 
 . 
 . cd "$INPUT_PATH/Merge"
@@ -12,54 +12,464 @@ C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 ECO375\ECO3
 . * Load collapsed data for regression
 . use "HOLC_Voting_Covariates.dta", clear
 
+. drop _merge
+
+. replace _yr_median = _yr_median / 1000
+variable _yr_median was long now double
+(16,242 real changes made)
+
+. 
+. 
+. * label dataset
+. foreach var of varlist perc_tract_a-perc_tract_d{
+  2.         local name = "Grade " + strupper(substr("`var'", 12, 1)) + " share"
+  3.         label variable `var' "`name'" 
+  4. }
+
+. label variable city "City"
+
+. label variable state "State"
+
+. label variable tract_dvoteshare "Dem vote share"
+
+. label variable _yr_median "Median income ('000s)"
+
+. label variable median_age "Median age"
+
+. label variable male_female_ratio "M-F ratio"
+
+. label variable perc_less_hs_total "Less HS share"
+
+. label variable perc_hs_total "HS share"
+
+. label variable perc_somecol_total "Some college share"
+
+. label variable perc_bach_total "Bachelor's share"
+
+. label variable perc_pop_white "White share"
+
+. label variable perc_pop_black "Black share"
+
+. label variable perc_pop_asian "Asian share"
+
 . 
 . * Scatter plot
-. twoway(scatter tract_dvoteshare perc_tract_d if tract_holc_share > 0.8)
-
-. 
-end of do-file
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD38ac_000000.tmp"
-
-. twoway(scatter tract_dvoteshare perc_tract_d if tract_holc_share > 0.8)
+. twoway(scatter tract_dvoteshare perc_tract_d if tract_holc_share > 0.9)
 
 . graph export "$OUTPUT_PATH\baseline_scatter.png", as(png) replace
-(file C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output\baseline_scatter.png not found)
 file C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output\baseline_scatter.png saved as PNG format
 
 . 
-end of do-file
+. * Generate summary statistics
+. eststo: estpost sum perc_tract_d tract_dvoteshare median_age male_female_ratio perc_hs_total-perc_pop_asian
 
-. help label
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+perc_tract_d |     16582      16582   .1784976   .0951015   .3083853          0          1   2959.848 
+tract_dvot~e |     16352      16352   .7405509   .0267149   .1634468   .0415478          1   12109.49 
+  median_age |     16395      16395   37.21918   52.22612   7.226764       10.9       80.8   610208.4 
+male_femal~o |     16395      16395   110.5203    1944729   1394.536       17.5     177900    1811981 
+perc_hs_to~l |     16419      16419   .2565209   .0144762   .1203171          0          1   4211.817 
+perc_somec~l |     16419      16419   .2729664   .0100519   .1002591          0          1   4481.835 
+perc_bach_~l |     16419      16419   .3256368   .0519266    .227874          0          1   5346.631 
+perc_pop_w~e |     16515      16515   .4749824   .0853948   .2922239          0          1   7844.335 
+perc_pop_b~k |     16515      16515   .2333328   .0780362   .2793496          0    .986733   3853.491 
+perc_pop_a~n |     16515      16515   .0781512   .0142298   .1192888          0          1   1290.668 
+(est1 stored)
 
-. help label
+. esttab, cells("mean sd") label nodepvar   
 
-. do "C:\Users\lijia\AppData\Local\Temp\STD38ac_000000.tmp"
-
-. label variable perc_tract_a perc_tract_b "Grade A Percentage" "Grade B Percentage"
-invalid syntax
-r(198);
-
-end of do-file
-
-r(198);
-
-. do "C:\Users\lijia\AppData\Local\Temp\STD38ac_000000.tmp"
-
-. label variable perc_tract_a "Grade A Percentage"
+----------------------------------------------
+                              (1)             
+                             est1             
+                             mean           sd
+----------------------------------------------
+Grade D share            .1784976     .3083853
+Dem vote share           .7405509     .1634468
+Median age               37.21918     7.226764
+M-F ratio                110.5203     1394.536
+HS share                 .2565209     .1203171
+Some college share       .2729664     .1002591
+Bachelor's share         .3256368      .227874
+White share              .4749824     .2922239
+Black share              .2333328     .2793496
+Asian share              .0781512     .1192888
+----------------------------------------------
+Observations                16582             
+----------------------------------------------
 
 . 
 end of do-file
 
-. do "C:\Users\lijia\AppData\Local\Temp\STD38ac_000000.tmp"
+. br
 
-. label variable perc_tract_a "Grade A Percentage"
+. do "C:\Users\lijia\AppData\Local\Temp\STD314_000000.tmp"
 
-. label variable perc_tract_b "Grade B Percentage"
+. eststo: estpost sum perc_tract_d tract_dvoteshare median_age male_female_ratio perc_hs_total-perc_pop_asian if tract_holc_share > 0.9
 
-. label variable perc_tract_c "Grade C Percentage"
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+perc_tract_d |      6116       6116   .2791257   .1615037   .4018752          0          1   1707.133 
+tract_dvot~e |      6073       6073    .791295   .0222444   .1491457   .0415478   .9785084   4805.535 
+  median_age |      6109       6109   36.13973   42.42882   6.513741       10.9       72.4   220777.6 
+male_femal~o |      6109       6109   96.99637   3071.442   55.42059       34.7     3238.9   592550.8 
+perc_hs_to~l |      6110       6110   .2512854   .0140482   .1185249          0   .7152256   1535.354 
+perc_somec~l |      6110       6110   .2600792   .0091223   .0955109          0   .8688588   1589.084 
+perc_bach_~l |      6110       6110    .326811    .053733   .2318037          0          1   1996.815 
+perc_pop_w~e |      6113       6113   .3989509   .0840969   .2899946          0   .9546859   2438.787 
+perc_pop_b~k |      6113       6113   .2712823   .0915831    .302627          0   .9755827   1658.349 
+perc_pop_a~n |      6113       6113   .0880263   .0172717   .1314218          0   .9106402    538.105 
+(est2 stored)
 
-. label variable perc_tract_d "Grade D Percentage"
+. esttab, cells("mean sd") label nodepvar   
+
+------------------------------------------------------------------------
+                              (1)                       (2)             
+                             est1                      est2             
+                             mean           sd         mean           sd
+------------------------------------------------------------------------
+Grade D share            .1784976     .3083853     .2791257     .4018752
+Dem vote share           .7405509     .1634468      .791295     .1491457
+Median age               37.21918     7.226764     36.13973     6.513741
+M-F ratio                110.5203     1394.536     96.99637     55.42059
+HS share                 .2565209     .1203171     .2512854     .1185249
+Some college share       .2729664     .1002591     .2600792     .0955109
+Bachelor's share         .3256368      .227874      .326811     .2318037
+White share              .4749824     .2922239     .3989509     .2899946
+Black share              .2333328     .2793496     .2712823      .302627
+Asian share              .0781512     .1192888     .0880263     .1314218
+------------------------------------------------------------------------
+Observations                16582                      6116             
+------------------------------------------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD314_000000.tmp"
+
+. eststo sum_stat: estpost sum perc_tract_d tract_dvoteshare median_age male_female_ratio perc_hs_total-perc_pop_asian if tract_holc_share > 0.9
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+perc_tract_d |      6116       6116   .2791257   .1615037   .4018752          0          1   1707.133 
+tract_dvot~e |      6073       6073    .791295   .0222444   .1491457   .0415478   .9785084   4805.535 
+  median_age |      6109       6109   36.13973   42.42882   6.513741       10.9       72.4   220777.6 
+male_femal~o |      6109       6109   96.99637   3071.442   55.42059       34.7     3238.9   592550.8 
+perc_hs_to~l |      6110       6110   .2512854   .0140482   .1185249          0   .7152256   1535.354 
+perc_somec~l |      6110       6110   .2600792   .0091223   .0955109          0   .8688588   1589.084 
+perc_bach_~l |      6110       6110    .326811    .053733   .2318037          0          1   1996.815 
+perc_pop_w~e |      6113       6113   .3989509   .0840969   .2899946          0   .9546859   2438.787 
+perc_pop_b~k |      6113       6113   .2712823   .0915831    .302627          0   .9755827   1658.349 
+perc_pop_a~n |      6113       6113   .0880263   .0172717   .1314218          0   .9106402    538.105 
+
+. esttab sum_stat, cells("mean sd") label nodepvar   
+
+----------------------------------------------
+                              (1)             
+                         sum_stat             
+                             mean           sd
+----------------------------------------------
+Grade D share            .2791257     .4018752
+Dem vote share            .791295     .1491457
+Median age               36.13973     6.513741
+M-F ratio                96.99637     55.42059
+HS share                 .2512854     .1185249
+Some college share       .2600792     .0955109
+Bachelor's share          .326811     .2318037
+White share              .3989509     .2899946
+Black share              .2712823      .302627
+Asian share              .0880263     .1314218
+----------------------------------------------
+Observations                 6116             
+----------------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD314_000000.tmp"
+
+. eststo sum_stat: estpost sum perc_tract_a-perc_tract_d tract_dvoteshare median_age male_female_ratio perc_hs_total-perc_pop_asian if tract_holc_share > 0.9
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+perc_tract_a |      6116       6116   .0517003   .0329675   .1815696          0          1   316.1992 
+perc_tract_b |      6116       6116   .2007491    .111615   .3340884          0          1   1227.782 
+perc_tract_c |      6116       6116   .4530519   .1771725   .4209187          0          1   2770.866 
+perc_tract_d |      6116       6116   .2791257   .1615037   .4018752          0          1   1707.133 
+tract_dvot~e |      6073       6073    .791295   .0222444   .1491457   .0415478   .9785084   4805.535 
+  median_age |      6109       6109   36.13973   42.42882   6.513741       10.9       72.4   220777.6 
+male_femal~o |      6109       6109   96.99637   3071.442   55.42059       34.7     3238.9   592550.8 
+perc_hs_to~l |      6110       6110   .2512854   .0140482   .1185249          0   .7152256   1535.354 
+perc_somec~l |      6110       6110   .2600792   .0091223   .0955109          0   .8688588   1589.084 
+perc_bach_~l |      6110       6110    .326811    .053733   .2318037          0          1   1996.815 
+perc_pop_w~e |      6113       6113   .3989509   .0840969   .2899946          0   .9546859   2438.787 
+perc_pop_b~k |      6113       6113   .2712823   .0915831    .302627          0   .9755827   1658.349 
+perc_pop_a~n |      6113       6113   .0880263   .0172717   .1314218          0   .9106402    538.105 
+
+. esttab sum_stat, cells("mean sd") label nodepvar   
+
+----------------------------------------------
+                              (1)             
+                         sum_stat             
+                             mean           sd
+----------------------------------------------
+Grade A share            .0517003     .1815696
+Grade B share            .2007491     .3340884
+Grade C share            .4530519     .4209187
+Grade D share            .2791257     .4018752
+Dem vote share            .791295     .1491457
+Median age               36.13973     6.513741
+M-F ratio                96.99637     55.42059
+HS share                 .2512854     .1185249
+Some college share       .2600792     .0955109
+Bachelor's share          .326811     .2318037
+White share              .3989509     .2899946
+Black share              .2712823      .302627
+Asian share              .0880263     .1314218
+----------------------------------------------
+Observations                 6116             
+----------------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD314_000000.tmp"
+
+. eststo sum_stat: estpost sum perc_tract_a-perc_tract_d tract_dvoteshare median_age male_female_ratio perc_less_hs_total-perc_pop_asian if tract_holc_share > 0.9
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+perc_tract_a |      6116       6116   .0517003   .0329675   .1815696          0          1   316.1992 
+perc_tract_b |      6116       6116   .2007491    .111615   .3340884          0          1   1227.782 
+perc_tract_c |      6116       6116   .4530519   .1771725   .4209187          0          1   2770.866 
+perc_tract_d |      6116       6116   .2791257   .1615037   .4018752          0          1   1707.133 
+tract_dvot~e |      6073       6073    .791295   .0222444   .1491457   .0415478   .9785084   4805.535 
+  median_age |      6109       6109   36.13973   42.42882   6.513741       10.9       72.4   220777.6 
+male_femal~o |      6109       6109   96.99637   3071.442   55.42059       34.7     3238.9   592550.8 
+perc_less_~l |      6110       6110   .1618243   .0138007   .1174764          0   .6462625   988.7467 
+perc_hs_to~l |      6110       6110   .2512854   .0140482   .1185249          0   .7152256   1535.354 
+perc_somec~l |      6110       6110   .2600792   .0091223   .0955109          0   .8688588   1589.084 
+perc_bach_~l |      6110       6110    .326811    .053733   .2318037          0          1   1996.815 
+perc_pop_w~e |      6113       6113   .3989509   .0840969   .2899946          0   .9546859   2438.787 
+perc_pop_b~k |      6113       6113   .2712823   .0915831    .302627          0   .9755827   1658.349 
+perc_pop_a~n |      6113       6113   .0880263   .0172717   .1314218          0   .9106402    538.105 
+
+. esttab sum_stat, cells("mean sd") label nodepvar   
+
+----------------------------------------------
+                              (1)             
+                         sum_stat             
+                             mean           sd
+----------------------------------------------
+Grade A share            .0517003     .1815696
+Grade B share            .2007491     .3340884
+Grade C share            .4530519     .4209187
+Grade D share            .2791257     .4018752
+Dem vote share            .791295     .1491457
+Median age               36.13973     6.513741
+M-F ratio                96.99637     55.42059
+Less HS share            .1618243     .1174764
+HS share                 .2512854     .1185249
+Some college share       .2600792     .0955109
+Bachelor's share          .326811     .2318037
+White share              .3989509     .2899946
+Black share              .2712823      .302627
+Asian share              .0880263     .1314218
+----------------------------------------------
+Observations                 6116             
+----------------------------------------------
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD314_000
+> 000.tmp"
+
+. esttab sum_stat using "$OUTPUT_PATH\sum_stat.tex
+> ", cells("mean sd") label ///
+>         nodepvar booktabs
+(output written to C:/Users/lijia/OneDrive - Unive
+> rsity of Toronto/Documents/School/1-5 ECO375/ECO
+> 375 Project//3 - Output\sum_stat.tex)
+
+. 
+end of do-file
+
+. help esttab
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD314_000
+> 000.tmp"
+
+. esttab sum_stat using "$OUTPUT_PATH\sum_stat.tex
+> ", cells("mean sd") label ///
+>         nodepvar nonumbers booktabs
+file C:/Users/lijia/OneDrive - University of
+    Toronto/Documents/School/1-5 ECO375/ECO375
+    Project//3 - Output\sum_stat.tex already
+    exists
+r(602);
+
+end of do-file
+
+r(602);
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD314_000
+> 000.tmp"
+
+. esttab sum_stat using "$OUTPUT_PATH\sum_stat.tex
+> ", cells("mean sd") label ///
+>         nodepvar nonumbers booktabs replace
+(output written to C:/Users/lijia/OneDrive - Unive
+> rsity of Toronto/Documents/School/1-5 ECO375/ECO
+> 375 Project//3 - Output\sum_stat.tex)
+
+. 
+end of do-file
+
+. help esttab
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD314_000
+> 000.tmp"
+
+. esttab sum_stat using "$OUTPUT_PATH\sum_stat.tex
+> ", cells("mean sd") label ///
+>         nodepvar nonumbers nomtitles booktabs re
+> place
+(output written to C:/Users/lijia/OneDrive - Unive
+> rsity of Toronto/Documents/School/1-5 ECO375/ECO
+> 375 Project//3 - Output\sum_stat.tex)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD314_000
+> 000.tmp"
+
+. eststo sum_stat: estpost sum perc_tract_a-perc_t
+> ract_d tract_dvoteshare median_age male_female_r
+> atio perc_less_hs_total-perc_pop_asian if tract_
+> holc_share > 0.9
+
+             |  e(count)   e(sum_w)    e(mean) 
+-------------+---------------------------------
+perc_tract_a |      6116       6116   .0517003 
+perc_tract_b |      6116       6116   .2007491 
+perc_tract_c |      6116       6116   .4530519 
+perc_tract_d |      6116       6116   .2791257 
+tract_dvot~e |      6073       6073    .791295 
+  median_age |      6109       6109   36.13973 
+male_femal~o |      6109       6109   96.99637 
+perc_less_~l |      6110       6110   .1618243 
+perc_hs_to~l |      6110       6110   .2512854 
+perc_somec~l |      6110       6110   .2600792 
+perc_bach_~l |      6110       6110    .326811 
+perc_pop_w~e |      6113       6113   .3989509 
+perc_pop_b~k |      6113       6113   .2712823 
+perc_pop_a~n |      6113       6113   .0880263 
+
+             |    e(Var)      e(sd)     e(min) 
+-------------+---------------------------------
+perc_tract_a |  .0329675   .1815696          0 
+perc_tract_b |   .111615   .3340884          0 
+perc_tract_c |  .1771725   .4209187          0 
+perc_tract_d |  .1615037   .4018752          0 
+tract_dvot~e |  .0222444   .1491457   .0415478 
+  median_age |  42.42882   6.513741       10.9 
+male_femal~o |  3071.442   55.42059       34.7 
+perc_less_~l |  .0138007   .1174764          0 
+perc_hs_to~l |  .0140482   .1185249          0 
+perc_somec~l |  .0091223   .0955109          0 
+perc_bach_~l |   .053733   .2318037          0 
+perc_pop_w~e |  .0840969   .2899946          0 
+perc_pop_b~k |  .0915831    .302627          0 
+perc_pop_a~n |  .0172717   .1314218          0 
+
+             |    e(max)     e(sum) 
+-------------+----------------------
+perc_tract_a |         1   316.1992 
+perc_tract_b |         1   1227.782 
+perc_tract_c |         1   2770.866 
+perc_tract_d |         1   1707.133 
+tract_dvot~e |  .9785084   4805.535 
+  median_age |      72.4   220777.6 
+male_femal~o |    3238.9   592550.8 
+perc_less_~l |  .6462625   988.7467 
+perc_hs_to~l |  .7152256   1535.354 
+perc_somec~l |  .8688588   1589.084 
+perc_bach_~l |         1   1996.815 
+perc_pop_w~e |  .9546859   2438.787 
+perc_pop_b~k |  .9755827   1658.349 
+perc_pop_a~n |  .9106402    538.105 
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD314_000
+> 000.tmp"
+
+. eststo sum_stat: estpost sum perc_tract_a-perc_t
+> ract_d tract_dvoteshare median_age male_female_r
+> atio perc_less_hs_total-perc_pop_asian if tract_
+> holc_share > 0.9
+
+             |  e(count)   e(sum_w)    e(mean) 
+-------------+---------------------------------
+perc_tract_a |      6116       6116   .0517003 
+perc_tract_b |      6116       6116   .2007491 
+perc_tract_c |      6116       6116   .4530519 
+perc_tract_d |      6116       6116   .2791257 
+tract_dvot~e |      6073       6073    .791295 
+  median_age |      6109       6109   36.13973 
+male_femal~o |      6109       6109   96.99637 
+perc_less_~l |      6110       6110   .1618243 
+perc_hs_to~l |      6110       6110   .2512854 
+perc_somec~l |      6110       6110   .2600792 
+perc_bach_~l |      6110       6110    .326811 
+perc_pop_w~e |      6113       6113   .3989509 
+perc_pop_b~k |      6113       6113   .2712823 
+perc_pop_a~n |      6113       6113   .0880263 
+
+             |    e(Var)      e(sd)     e(min) 
+-------------+---------------------------------
+perc_tract_a |  .0329675   .1815696          0 
+perc_tract_b |   .111615   .3340884          0 
+perc_tract_c |  .1771725   .4209187          0 
+perc_tract_d |  .1615037   .4018752          0 
+tract_dvot~e |  .0222444   .1491457   .0415478 
+  median_age |  42.42882   6.513741       10.9 
+male_femal~o |  3071.442   55.42059       34.7 
+perc_less_~l |  .0138007   .1174764          0 
+perc_hs_to~l |  .0140482   .1185249          0 
+perc_somec~l |  .0091223   .0955109          0 
+perc_bach_~l |   .053733   .2318037          0 
+perc_pop_w~e |  .0840969   .2899946          0 
+perc_pop_b~k |  .0915831    .302627          0 
+perc_pop_a~n |  .0172717   .1314218          0 
+
+             |    e(max)     e(sum) 
+-------------+----------------------
+perc_tract_a |         1   316.1992 
+perc_tract_b |         1   1227.782 
+perc_tract_c |         1   2770.866 
+perc_tract_d |         1   1707.133 
+tract_dvot~e |  .9785084   4805.535 
+  median_age |      72.4   220777.6 
+male_femal~o |    3238.9   592550.8 
+perc_less_~l |  .6462625   988.7467 
+perc_hs_to~l |  .7152256   1535.354 
+perc_somec~l |  .8688588   1589.084 
+perc_bach_~l |         1   1996.815 
+perc_pop_w~e |  .9546859   2438.787 
+perc_pop_b~k |  .9755827   1658.349 
+perc_pop_a~n |  .9106402    538.105 
+
+. esttab sum_stat using "$OUTPUT_PATH\sum_stat.tex
+> ", cells("count mean sd min max") /// 
+> label nodepvar nonumbers nomtitles booktabs repl
+> ace
+(output written to C:/Users/lijia/OneDrive - Unive
+> rsity of Toronto/Documents/School/1-5 ECO375/ECO
+> 375 Project//3 - Output\sum_stat.tex)
 
 . 
 end of do-file
