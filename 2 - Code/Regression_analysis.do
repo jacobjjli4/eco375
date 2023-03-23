@@ -30,6 +30,13 @@ cd "$INPUT_PATH/Merge"
 * Load collapsed data for regression
 use "HOLC_Voting_Covariates.dta", clear
 
+* label dataset
+label variable perc_tract_a "Grade A Percentage"
+label variable perc_tract_b "Grade B Percentage"
+label variable perc_tract_c "Grade C Percentage"
+label variable perc_tract_d "Grade D Percentage"
+label city
+
 * Scatter plot
 twoway(scatter tract_dvoteshare perc_tract_d if tract_holc_share > 0.8)
 graph export "$OUTPUT_PATH\baseline_scatter.png", as(png) replace
