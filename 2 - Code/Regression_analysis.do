@@ -31,10 +31,13 @@ cd "$INPUT_PATH/Merge"
 use "HOLC_Voting_Covariates.dta", clear
 
 * Scatter plot
-scatter tract_dvoteshare perc_tract_d if tract_holc_share > 0.8
+twoway(scatter tract_dvoteshare perc_tract_d if tract_holc_share > 0.8)
+graph export "$OUTPUT_PATH\baseline_scatter.png", as(png) replace
+
 
 * Regression
-regress tract_dvoteshare perc_tract_d if tract_holc_share > 0.8, robust
+eststo baseline_reg: regress tract_dvoteshare perc_tract_d if tract_holc_share > 0.8, robust
+
 
 * Robustness check -- does changing the tract_holc_share cutoff affect results?
 quietly
