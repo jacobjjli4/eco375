@@ -1,0 +1,40 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{4}{c}}
+\toprule
+                    &\multicolumn{1}{c}{(1)}&\multicolumn{1}{c}{(2)}&\multicolumn{1}{c}{(3)}&\multicolumn{1}{c}{(4)}\\
+                    &\multicolumn{1}{c}{Democrat vote share}&\multicolumn{1}{c}{Democrat vote share}&\multicolumn{1}{c}{Democrat vote share}&\multicolumn{1}{c}{Democrat vote share}\\
+\midrule
+Grade D percentage  &      0.0740\sym{***}&      0.0258         &      0.0540\sym{*}  &       0.151\sym{***}\\
+                    &   (0.00414)         &    (0.0163)         &    (0.0281)         &    (0.0533)         \\
+\addlinespace
+Median income       &                     &  0.00000120\sym{**} &  0.00000120\sym{**} &  0.00000120\sym{**} \\
+                    &                     &(0.000000547)         &(0.000000548)         &(0.000000548)         \\
+\addlinespace
+White percentage    &                     &      -0.218\sym{**} &      -0.218\sym{**} &      -0.217\sym{**} \\
+                    &                     &     (0.100)         &     (0.100)         &     (0.100)         \\
+\addlinespace
+Black percentage    &                     &       0.198\sym{***}&       0.198\sym{***}&       0.198\sym{***}\\
+                    &                     &    (0.0355)         &    (0.0354)         &    (0.0356)         \\
+\addlinespace
+Asian percentage    &                     &      -0.135\sym{***}&      -0.135\sym{***}&      -0.135\sym{***}\\
+                    &                     &    (0.0474)         &    (0.0474)         &    (0.0473)         \\
+\addlinespace
+Median age          &                     &    -0.00252\sym{***}&    -0.00251\sym{***}&    -0.00249\sym{***}\\
+                    &                     &  (0.000585)         &  (0.000586)         &  (0.000593)         \\
+\addlinespace
+Grade D squared     &                     &                     &     -0.0296         &      -0.327\sym{***}\\
+                    &                     &                     &    (0.0180)         &     (0.117)         \\
+\addlinespace
+Grade D cubed       &                     &                     &                     &       0.204\sym{***}\\
+                    &                     &                     &                     &    (0.0767)         \\
+\addlinespace
+Constant            &       0.771\sym{***}&       0.794\sym{***}&       0.793\sym{***}&       0.789\sym{***}\\
+                    &   (0.00240)         &    (0.0369)         &    (0.0366)         &    (0.0367)         \\
+\midrule
+Observations        &        6073         &        6026         &        6026         &        6026         \\
+\bottomrule
+\multicolumn{5}{l}{\footnotesize Standard errors in parentheses}\\
+\multicolumn{5}{l}{\footnotesize \sym{*} \(p<0.10\), \sym{**} \(p<0.05\), \sym{***} \(p<0.01\)}\\
+\end{tabular}
+}
