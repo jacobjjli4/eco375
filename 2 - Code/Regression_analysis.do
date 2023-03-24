@@ -65,6 +65,7 @@ label nodepvar nonumbers nomtitles booktabs replace
 eststo reg_baseline: regress tract_dvoteshare perc_tract_d if tract_holc_share > 0.9, robust
 esttab reg_baseline using "$OUTPUT_PATH/base_regression.tex", ///
 se star(* 0.10 ** 	0.05 *** 0.01) replace booktabs label
+estadd local city_controls "No"
 
 
 * Robustness check -- does changing the tract_holc_share cutoff affect results?
@@ -98,6 +99,9 @@ label variable perc_tract_d_sq "Grade D squared"
 label variable perc_tract_d_cu "Grade D cubed"
 
 #delimit ;
+perc_tract_d_cu _yr_median perc_pop_white-perc_pop_asian median_age i.city2 
+if tract_holc_share > 0.9, cluster(city2);
+
 eststo reg_linear: regress tract_dvoteshare perc_tract_d _yr_median
 perc_hs_total-perc_pop_asian median_age i.city2 
 if tract_holc_share > 0.9, cluster(city2);
@@ -106,12 +110,19 @@ eststo reg_quad: regress tract_dvoteshare perc_tract_d perc_tract_d_sq _yr_media
 perc_hs_total-perc_pop_asian  median_age i.city2 
 if tract_holc_share > 0.9, cluster(city2);
 
-eststo reg_cube: regress tract_dvoteshare perc_tract_d perc_tract_d_sq perc_tract_d_cu _yr_median perc_hs_total-perc_pop_asian median_age i.city2 if tract_holc_share > 0.9, cluster(city2);
+eststo reg_cube: regress tract_dvoteshare perc_tract_d perc_tract_d_sq 
+perc_tract_d_cu _yr_median perc_hs_total-perc_pop_asian median_age i.city2 
+if tract_holc_share > 0.9, cluster(city2);
+
+estadd local city_controls "Yes": reg_linear reg_quad reg_cube reg_no_educ; 
 #delimit cr
+
+* Export regressions
 #delimit ;
 esttab reg_* using "$OUTPUT_PATH/main_regressions.tex", 
-	se star(* 0.10 ** 	0.05 *** 0.01) replace booktabs label
-	drop(*.city2);
+	se star(* 0.10 ** 	0.05 *** 0.01) ar2 replace booktabs label
+	drop(*.city2)
+	stats(city_controls N r2_a, slabel("City fixed effects" "Observations" "Adjusted R2"));
 #delimit cr
 
 log close
