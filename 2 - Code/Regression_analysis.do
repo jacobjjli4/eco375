@@ -57,7 +57,9 @@ twoway(scatter tract_dvoteshare perc_tract_d if tract_holc_share > 0.9)
 graph export "$OUTPUT_PATH\baseline_scatter.png", as(png) replace
 
 * Generate summary statistics
-sum perc_tract_d tract_dvoteshare median_age male_female_ratio perc_hs_total-perc_pop_asian
+eststo sum_stat: estpost sum perc_tract_a-perc_tract_d tract_dvoteshare median_age male_female_ratio perc_less_hs_total-perc_pop_asian if tract_holc_share > 0.9
+esttab sum_stat using "$OUTPUT_PATH\sum_stat.tex", cells("count(fmt(%8.0f)) mean(fmt(%8.3g)) sd(fmt(%8.3g)) min(fmt(%8.3g)) max(fmt(%8.3g))") /// 
+label nodepvar nonumbers nomtitles booktabs replace
 
 * Regression
 eststo reg_baseline: regress tract_dvoteshare perc_tract_d if tract_holc_share > 0.9, robust
