@@ -27,22 +27,14 @@
 % Path for Ben
 %\newcommand{\opath}{}
 
-\newcommand{\ltable}[2]{
-	\begin{scriptsize}
-	\centering
-	\input{\opath/#1}
-	\label{#2}
-	\end{scriptsize}
-}
-
 \newcommand{\datatable}[3]{ % for regression output
 	\begin{table}[h]
-	\begin{scriptsize}
+	\begin{normalsize}
 	\centering
 	\input{\opath/#1}
 	\label{#2}
 	\caption{#3}
-	\end{scriptsize}
+	\end{normalsize}
 	\end{table}
 }
 

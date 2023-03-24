@@ -53,7 +53,7 @@ label variable perc_pop_black "Black share"
 label variable perc_pop_asian "Asian share"
 
 * Scatter plot
-twoway(scatter tract_dvoteshare perc_tract_d if tract_holc_share > 0.9)
+twoway(scatter tract_dvoteshare perc_tract_d if tract_holc_share > 0.9, msize(0.8))
 graph export "$OUTPUT_PATH\baseline_scatter.png", as(png) replace
 
 * Generate summary statistics
@@ -114,7 +114,11 @@ eststo reg_all_cov: regress tract_dvoteshare perc_tract_d perc_tract_d_sq
 perc_tract_d_cu _yr_median perc_hs_total-perc_pop_asian median_age i.city2 
 if tract_holc_share > 0.9, cluster(city2);
 
-estadd local city_controls "Yes": reg_base_cube reg_no_educ reg_no_race reg_all_cov; 
+eststo reg_all_cov_lin: regress tract_dvoteshare perc_tract_d _yr_median perc_hs_total-perc_pop_asian median_age i.city2 
+if tract_holc_share > 0.9, cluster(city2);
+
+estadd local city_controls "Yes": reg_base_cube reg_no_educ reg_no_race 
+	reg_all_cov reg_all_cov_lin; 
 #delimit cr
 
 * Export regressions
@@ -122,7 +126,7 @@ estadd local city_controls "Yes": reg_base_cube reg_no_educ reg_no_race reg_all_
 esttab reg_* using "$OUTPUT_PATH/main_regressions.tex", 
 	se star(* 0.10 ** 	0.05 *** 0.01) ar2 replace booktabs label
 	drop(*.city2)
-	stats(city_controls N r2_a, label("City fixed effects" "Observations" "Adjusted R2"));
+	stats(city_controls N r2_a, label("City fixed effects" "Observations" "Adjusted R$^2$"));
 #delimit cr
 
 log close
