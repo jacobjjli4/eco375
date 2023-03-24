@@ -1,0 +1,38 @@
+2023-03-24 Planning Meeting
+
+FINISH writing by the Monday, March 27th
+FORMAT on Tuesday, March 28th
+===Paper Outline===
+Abstract (Jacob)
+
+Intro (Ben)
+
+Context & Data (Ben)
+- what is redlining?
+- what are the effects of redlining?
+- how we merged our data
+- geographical distribution census tracts that we use (map)
+- discuss summary statistics
+
+Simple Linear Regression (Jacob)
+- discuss results
+- discuss if LSAs hold
+- limitations of the simple model (OVB)
+
+Multiple Linear Regression (Jacob)
+- explain why we chose the covariates that we did (Ben)
+- introduce models, explain why we chose the models that we did
+- discuss results
+
+Limitations (Ben)
+- internal validity
+	- OVB (other geographically targeted government programs)
+	- wrong functional form (log?)
+	- errors-in-variables (census tract is pretty small, so there may be measurement error)
+	- sample selection (Kentucky and West Virginia did not have voting data)
+	- simultaneous causality (no, there is temporal separation)
+- external validity
+	- our study was on cities with >40000 population in 1930 (double check)
+	- leaves out many Western cities
+
+Conclusion (Jacob)
