@@ -40,7 +40,7 @@ foreach var of varlist perc_tract_a-perc_tract_d{
 }
 label variable city "City"
 label variable state "State"
-label variable tract_dvoteshare "Dem vote share"
+label variable tract_dvoteshare "Dem share"
 label variable _yr_median "Median income ('000s)"
 label variable median_age "Median age"
 label variable male_female_ratio "M-F ratio"
@@ -99,22 +99,22 @@ label variable perc_tract_d_sq "Grade D squared"
 label variable perc_tract_d_cu "Grade D cubed"
 
 #delimit ;
+eststo reg_base_cube: regress tract_dvoteshare perc_tract_d perc_tract_d_sq 
+perc_tract_d_cu i.city2 if tract_holc_share > 0.9, cluster(city2);
+
+eststo reg_no_educ: regress tract_dvoteshare perc_tract_d perc_tract_d_sq 
 perc_tract_d_cu _yr_median perc_pop_white-perc_pop_asian median_age i.city2 
 if tract_holc_share > 0.9, cluster(city2);
 
-eststo reg_linear: regress tract_dvoteshare perc_tract_d _yr_median
-perc_hs_total-perc_pop_asian median_age i.city2 
+eststo reg_no_race: regress tract_dvoteshare perc_tract_d perc_tract_d_sq 
+perc_tract_d_cu _yr_median perc_hs_total-perc_bach_total median_age i.city2 
 if tract_holc_share > 0.9, cluster(city2);
 
-eststo reg_quad: regress tract_dvoteshare perc_tract_d perc_tract_d_sq _yr_median
-perc_hs_total-perc_pop_asian  median_age i.city2 
-if tract_holc_share > 0.9, cluster(city2);
-
-eststo reg_cube: regress tract_dvoteshare perc_tract_d perc_tract_d_sq 
+eststo reg_all_cov: regress tract_dvoteshare perc_tract_d perc_tract_d_sq 
 perc_tract_d_cu _yr_median perc_hs_total-perc_pop_asian median_age i.city2 
 if tract_holc_share > 0.9, cluster(city2);
 
-estadd local city_controls "Yes": reg_linear reg_quad reg_cube reg_no_educ; 
+estadd local city_controls "Yes": reg_base_cube reg_no_educ reg_no_race reg_all_cov; 
 #delimit cr
 
 * Export regressions
@@ -122,7 +122,7 @@ estadd local city_controls "Yes": reg_linear reg_quad reg_cube reg_no_educ;
 esttab reg_* using "$OUTPUT_PATH/main_regressions.tex", 
 	se star(* 0.10 ** 	0.05 *** 0.01) ar2 replace booktabs label
 	drop(*.city2)
-	stats(city_controls N r2_a, slabel("City fixed effects" "Observations" "Adjusted R2"));
+	stats(city_controls N r2_a, label("City fixed effects" "Observations" "Adjusted R2"));
 #delimit cr
 
 log close

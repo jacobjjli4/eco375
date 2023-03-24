@@ -36,14 +36,14 @@
 }
 
 \newcommand{\datatable}[3]{ % for regression output
-	\begin{tiny}
 	\begin{table}[h]
+	\begin{scriptsize}
 	\centering
 	\input{\opath/#1}
 	\label{#2}
 	\caption{#3}
+	\end{scriptsize}
 	\end{table}
-	\end{tiny}
 }
 
 \newcommand{\datatableii}[4]{ % for regression output that needs 2 tables
