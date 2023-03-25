@@ -1,0 +1,369 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/map_log.log
+  log type:  text
+ opened on:  25 Mar 2023, 15:44:51
+
+. 
+. cd "$INPUT_PATH/Mapping"
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 ECO375\ECO375 Project\1 - Data\Mapping
+
+. 
+. import delimited using "uscities.csv"
+(encoding automatically selected: ISO-8859-1)
+(17 vars, 30,844 obs)
+
+. duplicates drop city, force
+
+Duplicates in terms of city
+
+(10,123 observations deleted)
+
+. drop city_ascii state_name-county_name population-id
+
+. rename state_id state
+
+. 
+. save "city_lat_lon.dta", replace
+file city_lat_lon.dta saved
+
+. 
+. cd "$INPUT_PATH/Merge"
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 ECO375\ECO375 Project\1 - Data\Merge
+
+. use "HOLC_voting_covariates.dta", clear
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD339c_000000.tmp"
+
+. drop if tract_dem_total == .
+(230 observations deleted)
+
+. drop if pop_white == .
+(0 observations deleted)
+
+. drop if _yr_median == .
+(338 observations deleted)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD339c_000000.tmp"
+
+. drop if median_age == .
+(0 observations deleted)
+
+. drop if male_female_ratio == .
+(0 observations deleted)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD339c_000000.tmp"
+
+. drop if perc_less_hs_total == .
+(0 observations deleted)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD339c_000000.tmp"
+
+. duplicates drop city, force
+
+Duplicates in terms of city
+
+(15,823 observations deleted)
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD339c_000000.tmp"
+
+. cd "$INPUT_PATH/Mapping"
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 ECO375\ECO375 Project\1 - Data\Mapping
+
+. merge 1:1 city state using "city_lat_lon.dta", gen(merge2)
+(variable city was str32, now str44 to accommodate using data's values)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                        20,602
+        from master                        36  (merge2==1)
+        from using                     20,566  (merge2==2)
+
+    Matched                               155  (merge2==3)
+    -----------------------------------------
+
+. drop if merge2 == 2
+(20,566 observations deleted)
+
+. drop tract_code-perc_tract_d tract_dem_total-perc_pop_asian
+
+. 
+end of do-file
+
+. br
+
+. replace lat = 41.764 in 10
+(1 real change made)
+
+. replace lng = -88.29 in 10
+(1 real change made)
+
+. *(2 variables, 1 observation pasted into data editor)
+
+. *(2 variables, 14 observations pasted into data editor)
+
+. *(2 variables, 11 observations pasted into data editor)
+
+. replace lng = . in 101
+(1 real change made, 1 to missing)
+
+. replace lng = . in 97
+(1 real change made, 1 to missing)
+
+. replace lng = . in 90
+(1 real change made, 1 to missing)
+
+. replace lng = . in 84
+(1 real change made, 1 to missing)
+
+. replace lng = . in 81
+(1 real change made, 1 to missing)
+
+. replace lng = . in 74
+(1 real change made, 1 to missing)
+
+. replace lng = . in 72
+(1 real change made, 1 to missing)
+
+. replace lng = . in 70
+(1 real change made, 1 to missing)
+
+. replace lng = . in 64
+(1 real change made, 1 to missing)
+
+. replace lng = . in 55
+(1 real change made, 1 to missing)
+
+. replace lng = . in 44
+(1 real change made, 1 to missing)
+
+. replace lng = . in 32
+(1 real change made, 1 to missing)
+
+. replace lng = . in 38
+(1 real change made, 1 to missing)
+
+. replace lng = . in 57
+(1 real change made, 1 to missing)
+
+. replace lat = . in 32
+(1 real change made, 1 to missing)
+
+. replace lat = . in 38
+(1 real change made, 1 to missing)
+
+. replace lat = . in 44
+(1 real change made, 1 to missing)
+
+. replace lat = . in 55
+(1 real change made, 1 to missing)
+
+. replace lat = . in 57
+(1 real change made, 1 to missing)
+
+. replace lat = . in 64
+(1 real change made, 1 to missing)
+
+. replace lat = . in 70
+(1 real change made, 1 to missing)
+
+. replace lat = . in 72
+(1 real change made, 1 to missing)
+
+. replace lat = . in 74
+(1 real change made, 1 to missing)
+
+. replace lat = . in 81
+(1 real change made, 1 to missing)
+
+. replace lat = . in 84
+(1 real change made, 1 to missing)
+
+. replace lat = . in 90
+(1 real change made, 1 to missing)
+
+. replace lat = . in 97
+(1 real change made, 1 to missing)
+
+. replace lat = . in 101
+(1 real change made, 1 to missing)
+
+. *(2 variables, 1 observation pasted into data editor)
+
+. *(2 variables, 1 observation pasted into data editor)
+
+. *(2 variables, 2 observations pasted into data editor)
+
+. *(2 variables, 1 observation pasted into data editor)
+
+. *(2 variables, 1 observation pasted into data editor)
+
+. *(2 variables, 1 observation pasted into data editor)
+
+. *(2 variables, 1 observation pasted into data editor)
+
+. *(2 variables, 1 observation pasted into data editor)
+
+. *(2 variables, 1 observation pasted into data editor)
+
+. *(2 variables, 1 observation pasted into data editor)
+
+. replace lat = 42.415 in 5
+(1 real change made)
+
+. replace lng = -71.156 in 5
+(1 real change made)
+
+. replace lat = 42.396 in 16
+(1 real change made)
+
+. replace lng = -71.179 in 16
+(1 real change made)
+
+. replace lat = 35.045 in 32
+(1 real change made)
+
+. replace lng = -85.267 in 32
+(1 real change made)
+
+. replace lat = 32.492 in 38
+(1 real change made)
+
+. replace lng = -84.940 in 38
+(1 real change made)
+
+. replace lat = 42.241 in 44
+(1 real change made)
+
+. replace lng = -71.157 in 44
+(1 real change made)
+
+. replace lat = 42.408 in 57
+(1 real change made)
+
+. replace lng = -71.054 in 57
+(1 real change made)
+
+. replace lat = 42.246 in 74
+(1 real change made)
+
+. replace lng = -84.400 in 74
+(1 real change made)
+
+. replace lat = 42.447 in 84
+(1 real change made)
+
+. replace lng = -71.227 in 84
+(1 real change made)
+
+. replace lat = 42.419 in 97
+(1 real change made)
+
+. replace lng = -71.106 in 97
+(1 real change made)
+
+. replace lat = 42.25 in 101
+(1 real change made)
+
+. replace lng = -71.066 in 101
+(1 real change made)
+
+. replace lat = 42.280 in 109
+(1 real change made)
+
+. replace lng = -71.237 in 109
+(1 real change made)
+
+. replace lat = 38.73 in 131
+(1 real change made)
+
+. replace lng = -83 in 131
+(1 real change made)
+
+. replace lat = 44.012 in 141
+(1 real change made)
+
+. replace lng = -92.48 in 141
+(1 real change made)
+
+. replace lat = 39.781 in 150
+(1 real change made)
+
+. replace lng = -89.648 in 150
+(1 real change made)
+
+. *(2 variables, 1 observation pasted into data editor)
+
+. replace lat = 42.464 in 150
+(1 real change made)
+
+. replace lng = -71.01 in 150
+(1 real change made)
+
+. replace lat = 41.653 in 171
+(1 real change made)
+
+. replace lng = -83.537 in 171
+(1 real change made)
+
+. replace lat = 42.728 in 174
+(1 real change made)
+
+. replace lng = -73.691 in 174
+(1 real change made)
+
+. replace lat = 41.237 in 180
+(1 real change made)
+
+. replace lng = -80.818 in 180
+(1 real change made)
+
+. replace lat = 42.371 in 183
+(1 real change made)
+
+. replace lng = -71.180 in 183
+(1 real change made)
+
+. replace lat = 42.452 in 186
+(1 real change made)
+
+. replace lng = -71.137 in 186
+(1 real change made)
+
+. replace lat = 42.382 in 188
+(1 real change made)
+
+. replace lng = -70.992 in 188
+(1 real change made)
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD339c_000000.tmp"
+
+. save "HOLC_cities_lat_lon.dta", replace
+file HOLC_cities_lat_lon.dta saved
+
+. 
+end of do-file
+
+. do "C:\Users\lijia\AppData\Local\Temp\STD339c_000000.tmp"
+
+. log close
+      name:  <unnamed>
+       log:  C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/map_log.log
+  log type:  text
+ closed on:  25 Mar 2023, 16:00:39
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
