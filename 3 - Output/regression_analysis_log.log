@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/regression_analysis_log.log
   log type:  text
- opened on:  25 Mar 2023, 15:24:03
+ opened on:  25 Mar 2023, 16:15:04
 
 . 
 . cd "$INPUT_PATH/Merge"
@@ -19,41 +19,1551 @@ variable _yr_median was long now double
 (16,242 real changes made)
 
 . 
-end of do-file
-
-. b
-command b is unrecognized
-r(199);
-
-. br
-
-. do "C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 ECO375\ECO375 Project\2 - Code\Map Making.do"
-
-. /*******************************************************************************
-> Class:                          ECO375 Winter 2023
-> Project:                        Feasibility Plan
-> Name:                           Jia Jun (Jacob) Li 1006824750
-> Name:                           Benjamin Lee 1007236475
-> 
-> Date Created:           Feb 27 2023
-> Last Updated:           Mar 14 2023
-> *******************************************************************************/
 . 
-. // Directories for Jacob
-. global PATH "C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project/"
+. * label dataset
+. foreach var of varlist perc_tract_a-perc_tract_d{
+  2.         local name = "Grade " + strupper(substr("`var'", 12, 1)) + " share"
+  3.         label variable `var' "`name'" 
+  4. }
 
-. global OUTPUT_PATH "$PATH/3 - Output"
+. label variable city "City"
 
-. global INPUT_PATH "$PATH/1 - Data"
+. label variable state "State"
+
+. label variable tract_dvoteshare "Dem share"
+
+. label variable _yr_median "Median income ('000s)"
+
+. label variable median_age "Median age"
+
+. label variable male_female_ratio "M-F ratio"
+
+. label variable perc_less_hs_total "Less HS share"
+
+. label variable perc_hs_total "HS share"
+
+. label variable perc_somecol_total "Some college share"
+
+. label variable perc_bach_total "Bachelor's share"
+
+. label variable perc_pop_white "White share"
+
+. label variable perc_pop_black "Black share"
+
+. label variable perc_pop_asian "Asian share"
 
 . 
-. // * Directories for Ben
-. // global PATH "/Users/benlee/Documents/GitHub/eco375"
-. // global OUTPUT_PATH "$PATH/3 - Output"
-. // global INPUT_PATH "$PATH/1 - Data"
+. * Generate variable that indicates if a tract has sufficient data for analysis
+. gen incl = 1 if tract_dem_total != . & pop_white != . & _yr_median != . & median_age != . & male_female_ratio != . & perc_less_hs_total != . & tract_holc_share > 0.9
+(10,556 missing values generated)
+
 . 
-. clear all
+. * Scatter plot
+. twoway(scatter tract_dvoteshare perc_tract_d if incl == 1, msize(0.8))
 
-. set linesize 240
+. graph export "$OUTPUT_PATH\baseline_scatter.png", as(png) replace
+file C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output\baseline_scatter.png saved as PNG format
 
-. capture log close
+. 
+. * Generate summary statistics
+. eststo sum_stat: estpost sum perc_tract_a-perc_tract_d tract_dvoteshare median_age male_female_ratio perc_less_hs_total-perc_pop_asian if incl == 1
+
+             |  e(count)   e(sum_w)    e(mean)     e(Var)      e(sd)     e(min)     e(max)     e(sum) 
+-------------+----------------------------------------------------------------------------------------
+perc_tract_a |      6026       6026   .0513216   .0326679   .1807426          0          1   309.2637 
+perc_tract_b |      6026       6026   .2015847   .1121025    .334817          0          1    1214.75 
+perc_tract_c |      6026       6026    .454133   .1774894   .4212949          0          1   2736.605 
+perc_tract_d |      6026       6026   .2776713    .161035   .4012917          0          1   1673.247 
+tract_dvot~e |      6026       6026   .7908419   .0221765   .1489178   .0415478   .9785084   4765.613 
+  median_age |      6026       6026   36.12061   42.13784   6.491367       10.9       72.4   217662.8 
+male_femal~o |      6026       6026   95.92639   412.5845   20.31218       34.7      410.3   578052.4 
+perc_less_~l |      6026       6026   .1619919   .0138246   .1175782          0   .6462625   976.1634 
+perc_hs_to~l |      6026       6026   .2508055   .0139715   .1182012          0   .7152256   1511.354 
+perc_somec~l |      6026       6026   .2594869   .0089729   .0947256   .0181473   .8688588   1563.668 
+perc_bach_~l |      6026       6026   .3277157   .0536631   .2316529    .007326   .9444444   1974.815 
+perc_pop_w~e |      6026       6026   .3986796   .0837374   .2893742    .001224   .9546859   2402.443 
+perc_pop_b~k |      6026       6026   .2688388   .0907404   .3012314          0   .9755827   1620.023 
+perc_pop_a~n |      6026       6026   .0888438   .0173498   .1317188          0   .9106402    535.373 
+
+. esttab sum_stat using "$OUTPUT_PATH\sum_stat.tex", cells("count(fmt(%8.0f)) mean(fmt(%8.3g)) sd(fmt(%8.3g)) min(fmt(%8.3g)) max(fmt(%8.3g))") /// 
+> label nodepvar nonumbers nomtitles booktabs replace
+(output written to C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output\sum_stat.tex)
+
+. 
+. * Regression
+. eststo reg_baseline: regress tract_dvoteshare perc_tract_d if incl == 1, robust
+
+Linear regression                               Number of obs     =      6,026
+                                                F(1, 6024)        =     318.61
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0397
+                                                Root MSE          =     .14595
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .0739029   .0041403    17.85   0.000     .0657864    .0820194
+       _cons |   .7703212   .0024052   320.28   0.000     .7656062    .7750362
+------------------------------------------------------------------------------
+
+. esttab reg_baseline using "$OUTPUT_PATH/base_regression.tex", ///
+> se star(* 0.10 **       0.05 *** 0.01) replace booktabs label
+(output written to C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/base_regression.tex)
+
+. estadd local city_controls "No"
+
+added macro:
+      e(city_controls) : "No"
+
+. 
+. 
+. * Robustness check -- does changing the tract_holc_share cutoff affect results?
+. quietly
+
+. foreach min_perc of numlist 0 5:100 {
+  2.         eststo robustness_`min_perc': reg tract_dvoteshare perc_tract_d if tract_holc_share*100 >= `min_perc', robust
+  3. }
+
+Linear regression                               Number of obs     =     16,352
+                                                F(1, 16350)       =    1479.13
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0606
+                                                Root MSE          =     .15842
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .1300968   .0033827    38.46   0.000     .1234663    .1367272
+       _cons |   .7172184   .0014752   486.20   0.000     .7143269    .7201099
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =     14,582
+                                                F(1, 14580)       =    1082.65
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0524
+                                                Root MSE          =     .15418
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |    .112892    .003431    32.90   0.000     .1061668    .1196171
+       _cons |   .7296024    .001546   471.93   0.000     .7265721    .7326327
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =     14,070
+                                                F(1, 14068)       =     981.81
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0500
+                                                Root MSE          =     .15301
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .1080362   .0034479    31.33   0.000     .1012778    .1147945
+       _cons |   .7331851   .0015702   466.94   0.000     .7301073    .7362629
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =     13,627
+                                                F(1, 13625)       =     910.71
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0484
+                                                Root MSE          =     .15225
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |     .10453   .0034638    30.18   0.000     .0977405    .1113196
+       _cons |   .7360285   .0015946   461.56   0.000     .7329028    .7391542
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =     13,217
+                                                F(1, 13215)       =     848.90
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0470
+                                                Root MSE          =     .15148
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .1012849   .0034763    29.14   0.000     .0944708    .1080989
+       _cons |   .7388002   .0016164   457.05   0.000     .7356317    .7419686
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =     12,814
+                                                F(1, 12812)       =     791.84
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0458
+                                                Root MSE          =     .15056
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .0981387   .0034876    28.14   0.000     .0913026    .1049748
+       _cons |   .7413696   .0016364   453.05   0.000      .738162    .7445772
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =     12,402
+                                                F(1, 12400)       =     736.03
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0444
+                                                Root MSE          =     .14992
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |    .094985   .0035011    27.13   0.000     .0881222    .1018477
+       _cons |   .7440165   .0016611   447.90   0.000     .7407604    .7472726
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =     11,999
+                                                F(1, 11997)       =     697.93
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0440
+                                                Root MSE          =     .14896
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .0928639   .0035151    26.42   0.000     .0859737    .0997541
+       _cons |   .7462746   .0016857   442.72   0.000     .7429704    .7495788
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =     11,571
+                                                F(1, 11569)       =     661.73
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0434
+                                                Root MSE          =     .14869
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |    .090933   .0035349    25.72   0.000     .0840039     .097862
+       _cons |   .7481441    .001718   435.48   0.000     .7447766    .7515116
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =     11,165
+                                                F(1, 11163)       =     629.57
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0429
+                                                Root MSE          =     .14849
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .0891857   .0035545    25.09   0.000     .0822183     .096153
+       _cons |   .7497326   .0017483   428.85   0.000     .7463057    .7531595
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =     10,650
+                                                F(1, 10648)       =     594.25
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0427
+                                                Root MSE          =     .14772
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .0872317   .0035784    24.38   0.000     .0802173     .094246
+       _cons |   .7523758   .0017845   421.61   0.000     .7488778    .7558738
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =     10,124
+                                                F(1, 10122)       =     552.49
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0420
+                                                Root MSE          =       .147
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .0847892   .0036073    23.51   0.000     .0777182    .0918602
+       _cons |    .755335   .0018293   412.90   0.000     .7517491    .7589208
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =      9,655
+                                                F(1, 9653)        =     515.46
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0412
+                                                Root MSE          =     .14642
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .0825766   .0036371    22.70   0.000     .0754471    .0897061
+       _cons |   .7572518   .0018689   405.19   0.000     .7535884    .7609152
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =      9,164
+                                                F(1, 9162)        =     488.60
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0410
+                                                Root MSE          =      .1464
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .0813253   .0036792    22.10   0.000     .0741133    .0885373
+       _cons |   .7585907   .0019186   395.39   0.000     .7548298    .7623515
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =      8,617
+                                                F(1, 8615)        =     450.32
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0402
+                                                Root MSE          =     .14658
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .0794003   .0037416    21.22   0.000     .0720658    .0867349
+       _cons |   .7606308   .0019876   382.68   0.000     .7567346    .7645271
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =      8,058
+                                                F(1, 8056)        =     412.71
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0394
+                                                Root MSE          =     .14672
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .0774447   .0038121    20.32   0.000     .0699719    .0849174
+       _cons |    .762862   .0020602   370.28   0.000     .7588235    .7669006
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =      7,434
+                                                F(1, 7432)        =     385.55
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0396
+                                                Root MSE          =      .1463
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .0762276   .0038822    19.64   0.000     .0686174    .0838377
+       _cons |   .7654135   .0021479   356.35   0.000     .7612029     .769624
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =      6,744
+                                                F(1, 6742)        =     364.39
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0407
+                                                Root MSE          =     .14586
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .0757889   .0039703    19.09   0.000     .0680059     .083572
+       _cons |    .767454    .002262   339.28   0.000     .7630197    .7718882
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =      6,073
+                                                F(1, 6071)        =     319.43
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0398
+                                                Root MSE          =     .14616
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .0739926     .00414    17.87   0.000     .0658767    .0821085
+       _cons |   .7706106   .0024001   321.08   0.000     .7659055    .7753156
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =      5,196
+                                                F(1, 5194)        =     285.84
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0406
+                                                Root MSE          =      .1461
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .0738808   .0043699    16.91   0.000      .065314    .0824476
+       _cons |   .7752338   .0025996   298.22   0.000     .7701375      .78033
+------------------------------------------------------------------------------
+
+Linear regression                               Number of obs     =      3,000
+                                                F(1, 2998)        =     171.73
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0420
+                                                Root MSE          =     .14386
+
+------------------------------------------------------------------------------
+             |               Robust
+tract_dvot~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .0711084   .0054263    13.10   0.000     .0604688    .0817479
+       _cons |   .7857403   .0034526   227.58   0.000     .7789706      .79251
+------------------------------------------------------------------------------
+
+. esttab robustness_* using "$OUTPUT_PATH/min_tract_holc_share_robustness.csv", se star(* 0.10 ** 0.05 *** 0.01) replace
+(output written to C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/min_tract_holc_share_robustness.csv)
+
+. 
+. drop _est_robustness*
+
+. 
+. * Robustness check -- does changing the way we measure redlining affect results?
+. eststo robustness2_d: regress tract_dvoteshare perc_tract_d if incl == 1
+
+      Source |       SS           df       MS      Number of obs   =     6,026
+-------------+----------------------------------   F(1, 6024)      =    248.78
+       Model |  5.29907482         1  5.29907482   Prob > F        =    0.0000
+    Residual |   128.31445     6,024   .02130054   R-squared       =    0.0397
+-------------+----------------------------------   Adj R-squared   =    0.0395
+       Total |  133.613525     6,025  .022176519   Root MSE        =    .14595
+
+------------------------------------------------------------------------------
+tract_dvot~e | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .0739029   .0046855    15.77   0.000     .0647176    .0830882
+       _cons |   .7703212   .0022864   336.92   0.000     .7658391    .7748033
+------------------------------------------------------------------------------
+
+. gen perc_tract_c_plus_d = perc_tract_c + perc_tract_d
+
+. eststo robustness2_c_plus_d: regress tract_dvoteshare perc_tract_c_plus_d if incl == 1
+
+      Source |       SS           df       MS      Number of obs   =     6,026
+-------------+----------------------------------   F(1, 6024)      =    116.09
+       Model |   2.5262533         1   2.5262533   Prob > F        =    0.0000
+    Residual |  131.087272     6,024  .021760835   R-squared       =    0.0189
+-------------+----------------------------------   Adj R-squared   =    0.0187
+       Total |  133.613525     6,025  .022176519   Root MSE        =    .14752
+
+-------------------------------------------------------------------------------------
+   tract_dvoteshare | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+--------------------+----------------------------------------------------------------
+perc_tract_c_plus_d |   .0534715   .0049627    10.77   0.000     .0437428    .0632003
+              _cons |   .7517112   .0040989   183.39   0.000     .7436759    .7597465
+-------------------------------------------------------------------------------------
+
+. eststo robustness2_c_and_d: regress tract_dvoteshare perc_tract_c perc_tract_d if incl == 1
+
+      Source |       SS           df       MS      Number of obs   =     6,026
+-------------+----------------------------------   F(2, 6023)      =    135.65
+       Model |  5.75895195         2  2.87947597   Prob > F        =    0.0000
+    Residual |  127.854573     6,023  .021227723   R-squared       =    0.0431
+-------------+----------------------------------   Adj R-squared   =    0.0428
+       Total |  133.613525     6,025  .022176519   Root MSE        =     .1457
+
+------------------------------------------------------------------------------
+tract_dvot~e | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_c |   .0251855    .005411     4.65   0.000     .0145779     .035793
+perc_tract_d |   .0889074   .0056808    15.65   0.000     .0777711    .1000437
+       _cons |   .7547173   .0040557   186.09   0.000     .7467667    .7626679
+------------------------------------------------------------------------------
+
+. eststo robustness2_b_c_d: regress tract_dvoteshare perc_tract_a perc_tract_c perc_tract_d if incl == 1
+
+      Source |       SS           df       MS      Number of obs   =     6,026
+-------------+----------------------------------   F(3, 6022)      =     90.84
+       Model |  5.78446969         3  1.92815656   Prob > F        =    0.0000
+    Residual |  127.829055     6,022   .02122701   R-squared       =    0.0433
+-------------+----------------------------------   Adj R-squared   =    0.0428
+       Total |  133.613525     6,025  .022176519   Root MSE        =    .14569
+
+------------------------------------------------------------------------------
+tract_dvot~e | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_a |  -.0129803   .0118388    -1.10   0.273    -.0361885     .010228
+perc_tract_c |   .0221873   .0060627     3.66   0.000     .0103023    .0340723
+perc_tract_d |   .0860432   .0062526    13.76   0.000     .0737859    .0983004
+       _cons |   .7575403   .0048039   157.69   0.000      .748123    .7669577
+------------------------------------------------------------------------------
+
+. 
+. esttab robustness2_* using "$OUTPUT_PATH/redlining_measure_robustness.csv", se star(* 0.10 ** 0.05 *** 0.01) replace
+(output written to C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/redlining_measure_robustness.csv)
+
+. 
+. noisily
+
+. * Regression with selected covariates
+. regress tract_dvoteshare perc_tract_d _yr_median perc_pop_white perc_pop_black ///
+> perc_pop_asian if incl == 1, robust
+
+Linear regression                               Number of obs     =      6,026
+                                                F(5, 6020)        =    1451.76
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.4373
+                                                Root MSE          =     .11176
+
+--------------------------------------------------------------------------------
+               |               Robust
+tract_dvotes~e | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+  perc_tract_d |   .0381437   .0031416    12.14   0.000     .0319851    .0443024
+    _yr_median |   .0012724   .0000606    20.99   0.000     .0011535    .0013912
+perc_pop_white |  -.2083987   .0083666   -24.91   0.000    -.2248003   -.1919972
+perc_pop_black |   .1868163   .0043499    42.95   0.000     .1782888    .1953437
+perc_pop_asian |  -.1567524   .0115021   -13.63   0.000    -.1793007   -.1342041
+         _cons |    .746491   .0042465   175.79   0.000     .7381664    .7548156
+--------------------------------------------------------------------------------
+
+. 
+. * Regression with selected covariates and city fixed effects
+. drop perc_tract_c_plus_d
+
+. 
+. encode city, generate(city2)
+
+. gen perc_tract_d_sq = perc_tract_d^2
+
+. gen perc_tract_d_cu = perc_tract_d^3
+
+. label variable perc_tract_d_sq "Grade D squared"
+
+. label variable perc_tract_d_cu "Grade D cubed"
+
+. 
+. gen perc_tract_c_sq = perc_tract_c^2
+
+. gen perc_tract_c_cu = perc_tract_c^3
+
+. label variable perc_tract_c_sq "Grade C squared"
+
+. label variable perc_tract_c_cu "Grade C cubed"
+
+. 
+. global indep_vars perc_tract_d* perc_tract_c*
+
+. 
+. #delimit ;
+delimiter now ;
+. eststo reg_base_c_d: regress tract_dvoteshare perc_tract_d perc_tract_c
+> i.city2 if incl == 1, cluster(city2);
+
+Linear regression                               Number of obs     =      6,026
+                                                F(1, 165)         =          .
+                                                Prob > F          =          .
+                                                R-squared         =     0.2831
+                                                Root MSE          =     .12787
+
+                                                     (Std. err. adjusted for 166 clusters in city2)
+---------------------------------------------------------------------------------------------------
+                                  |               Robust
+                 tract_dvoteshare | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+----------------------------------+----------------------------------------------------------------
+                     perc_tract_d |   .0803516   .0178641     4.50   0.000       .04508    .1156233
+                     perc_tract_c |   .0222173   .0114498     1.94   0.054    -.0003896    .0448243
+                                  |
+                            city2 |
+                          Albany  |   .1397589   .0045283    30.86   0.000      .130818    .1486998
+                         Altoona  |  -.3177146   .0017943  -177.07   0.000    -.3212573   -.3141718
+                        Amarillo  |  -.3046322   .0073298   -41.56   0.000    -.3191045   -.2901599
+                       Arlington  |   .1761391    .002875    61.27   0.000     .1704626    .1818156
+                         Atlanta  |   .1614598   .0060361    26.75   0.000     .1495419    .1733778
+                   Atlantic City  |   .1173564   .0095717    12.26   0.000     .0984576    .1362551
+                         Augusta  |   .2190935    .019938    10.99   0.000     .1797269      .25846
+                          Aurora  |   .1020932   .0090336    11.30   0.000     .0842569    .1199296
+                          Austin  |   .1462617   .0091821    15.93   0.000     .1281321    .1643914
+                       Baltimore  |   .2151978   .0073862    29.13   0.000     .2006141    .2297816
+                        Bay City  |  -.1231953   .0089236   -13.81   0.000    -.1408146   -.1055761
+                        Beaumont  |   .2283257   .0040399    56.52   0.000     .2203491    .2363022
+                         Belmont  |   .1307263   .0010381   125.93   0.000     .1286767     .132776
+                      Bergen Co.  |  -.0218142   .0008545   -25.53   0.000    -.0235014   -.0201271
+                      Birmingham  |   .1666932   .0085321    19.54   0.000     .1498471    .1835394
+                          Boston  |     .16643      .0049    33.97   0.000     .1567553    .1761047
+                        Brockton  |   .1550932   .0037413    41.45   0.000     .1477063    .1624801
+                           Bronx  |    .140103   .0036326    38.57   0.000     .1329307    .1472753
+                       Brookline  |   .2077469   .0031418    66.12   0.000     .2015435    .2139502
+                        Brooklyn  |   .0348491   .0060898     5.72   0.000     .0228251     .046873
+                         Buffalo  |   .1424335    .001527    93.28   0.000     .1394185    .1454485
+                       Cambridge  |   .1954652    .005874    33.28   0.000     .1838674    .2070631
+                          Camden  |   .0203978   .0011207    18.20   0.000     .0181851    .0226106
+                          Canton  |   .0076507   .0020813     3.68   0.000     .0035414      .01176
+                       Charlotte  |    .055573   .0059078     9.41   0.000     .0439083    .0672377
+                     Chattanooga  |   .0537668   .0001901   282.78   0.000     .0533914    .0541422
+                         Chelsea  |   .0894399   .0064177    13.94   0.000     .0767686    .1021112
+                         Chicago  |   .1733806    .004059    42.71   0.000     .1653663    .1813949
+                       Cleveland  |   .1301241   .0025698    50.64   0.000     .1250502    .1351981
+                        Columbia  |   .0563019    .007092     7.94   0.000     .0422992    .0703046
+                        Columbus  |   .1221186   .0020697    59.00   0.000      .118032    .1262052
+                  Council Bluffs  |  -.2016495   .0096138   -20.97   0.000    -.2206315   -.1826675
+                          Dallas  |   .0428791   .0010632    40.33   0.000     .0407799    .0449783
+                       Davenport  |  -.0685464   .0014019   -48.90   0.000    -.0713143   -.0657784
+                          Dayton  |   .0303442    .002899    10.47   0.000     .0246204    .0360681
+                         Decatur  |   .0096372   .0015492     6.22   0.000     .0065783     .012696
+                          Denver  |   .1619336   .0035389    45.76   0.000     .1549463    .1689209
+                      Des Moines  |   .0064304   .0049646     1.30   0.197     -.003372    .0162328
+                         Detroit  |   .1374038   .0036714    37.43   0.000     .1301548    .1446527
+                         Dubuque  |  -.0734434   .0054026   -13.59   0.000    -.0841105   -.0627762
+                          Duluth  |   .1041384   .0023112    45.06   0.000     .0995751    .1087017
+                          Durham  |   .2117966   .0111013    19.08   0.000     .1898777    .2337155
+                  East St. Louis  |   .2656567   .0070164    37.86   0.000     .2518032    .2795102
+                         El Paso  |   .0728735   .0051332    14.20   0.000     .0627382    .0830088
+                          Elmira  |   -.104126   .0016542   -62.95   0.000    -.1073922   -.1008599
+                            Erie  |  -.0005126   .0018178    -0.28   0.778    -.0041018    .0030766
+                       Essex Co.  |   .1712233   .0042674    40.12   0.000     .1627975    .1796491
+                      Evansville  |  -.0401757   .0014993   -26.80   0.000    -.0431359   -.0372155
+                         Everett  |   .0118892   .0032027     3.71   0.000     .0055658    .0182127
+                           Flint  |   .2861592   .0012231   233.95   0.000     .2837442    .2885743
+                      Fort Wayne  |    .006604   .0012969     5.09   0.000     .0040433    .0091647
+                      Fort Worth  |    .048587   .0067879     7.16   0.000     .0351848    .0619893
+                          Fresno  |   .0626042   .0021332    29.35   0.000     .0583923    .0668161
+                       Galveston  |  -.0016824   .0064469    -0.26   0.794    -.0144115    .0110468
+                    Grand Rapids  |     .04863   .0011618    41.86   0.000     .0463362    .0509238
+             Greater Kansas City  |   .1227589   .0078947    15.55   0.000     .1071713    .1383466
+                      Greensboro  |   .1771778   .0010157   174.44   0.000     .1751724    .1791833
+                      Harrisburg  |   .1879655   .0076307    24.63   0.000     .1728991     .203032
+                        Hartford  |   .1950689   .0002889   675.32   0.000     .1944986    .1956393
+                Holyoke Chicopee  |  -.0429498   .0012753   -33.68   0.000    -.0454678   -.0404318
+                         Houston  |   .1167611   .0063318    18.44   0.000     .1042592    .1292629
+                      Hudson Co.  |   .0409966   .0073598     5.57   0.000      .026465    .0555282
+                    Indianapolis  |   .0506998   .0033647    15.07   0.000     .0440564    .0573431
+                         Jackson  |  -.0299842   .0046762    -6.41   0.000    -.0392171   -.0207514
+                    Jacksonville  |   .0687821   .0085619     8.03   0.000     .0518771    .0856871
+                       Johnstown  |  -.2520514   .0029408   -85.71   0.000    -.2578579   -.2462449
+                          Joliet  |   .0078822    .002796     2.82   0.005     .0023617    .0134026
+                         Kenosha  |  -.1440122    .003652   -39.43   0.000    -.1512228   -.1368016
+                       Knoxville  |  -.0069279   .0068894    -1.01   0.316    -.0205307    .0066748
+                   Lake Co. Gary  |   .2117593   .0050073    42.29   0.000     .2018726     .221646
+                         Lansing  |   .0645308   .0020668    31.22   0.000       .06045    .0686117
+                            Lima  |  -.1287248   .0009929  -129.64   0.000    -.1306853   -.1267643
+                         Lincoln  |  -.0056949   .0013484    -4.22   0.000    -.0083572   -.0030326
+                     Little Rock  |   .2116575    .001619   130.73   0.000     .2084609    .2148541
+                     Los Angeles  |   .1116918   .0033735    33.11   0.000      .105031    .1183525
+           Lower Westchester Co.  |   .0211073    .003529     5.98   0.000     .0141396    .0280751
+                           Macon  |   .0864375   .0185002     4.67   0.000       .04991    .1229651
+                         Madison  |   .1708974   .0017311    98.72   0.000     .1674794    .1743154
+                          Malden  |   .0120698   .0096779     1.25   0.214    -.0070388    .0311783
+                      Manchester  |  -.0954221   .0021127   -45.17   0.000    -.0995935   -.0912508
+                       Manhattan  |   .1634393   .0125157    13.06   0.000     .1387278    .1881509
+                         Medford  |   .0362475   .0028265    12.82   0.000     .0306666    .0418284
+                         Melrose  |   .0555192   .0012578    44.14   0.000     .0530358    .0580026
+                         Memphis  |   .1575357   .0075594    20.84   0.000       .14261    .1724613
+                           Miami  |  -.0568646   .0036474   -15.59   0.000    -.0640662    -.049663
+                   Milwaukee Co.  |   .1367105   .0051826    26.38   0.000     .1264777    .1469432
+                     Minneapolis  |   .2085114   .0028318    73.63   0.000     .2029201    .2141027
+                          Mobile  |  -.0359382   .0053951    -6.66   0.000    -.0465906   -.0252857
+                      Montgomery  |   .0545219   .0091278     5.97   0.000     .0364997    .0725442
+                        Muskegon  |   .2267153   .0133427    16.99   0.000     .2003709    .2530598
+                       Nashville  |   .0289465   .0103124     2.81   0.006     .0085852    .0493077
+                     New Britain  |   .0200947   .0008907    22.56   0.000     .0183361    .0218533
+                      New Castle  |  -.1703353   .0048766   -34.93   0.000    -.1799638   -.1607068
+                       New Haven  |   .0198526   .0010267    19.34   0.000     .0178255    .0218797
+                     New Orleans  |   .1641381   .0087599    18.74   0.000     .1468422    .1814341
+                          Newton  |   .1571593   .0011382   138.07   0.000     .1549119    .1594068
+                   Niagara Falls  |   .0349096   .0022677    15.39   0.000     .0304322     .039387
+                         Norfolk  |   .1305735   .0082677    15.79   0.000     .1142495    .1468976
+                         Oakland  |   .2277356   .0044838    50.79   0.000     .2188827    .2365886
+                           Ogden  |  -.1302102   .0046863   -27.79   0.000    -.1394631   -.1209574
+                   Oklahoma City  |   .0199577   .0022094     9.03   0.000     .0155953    .0243201
+                           Omaha  |   .0521888   .0043508    12.00   0.000     .0435984    .0607792
+                         Oshkosh  |  -.1200674   .0153577    -7.82   0.000    -.1503904   -.0897444
+       Pawtucket & Central Falls  |   .0274089   .0030703     8.93   0.000     .0213467    .0334711
+                          Peoria  |   .1126448   .0064078    17.58   0.000     .0999928    .1252967
+                    Philadelphia  |   .1691256   .0082312    20.55   0.000     .1528736    .1853776
+                         Phoenix  |   .1151802    .006635    17.36   0.000     .1020797    .1282808
+                      Pittsburgh  |   .1157053   .0045573    25.39   0.000     .1067072    .1247033
+                         Pontiac  |   .1745124   .0043354    40.25   0.000     .1659523    .1830724
+                     Port Arthur  |   .1220282    .005602    21.78   0.000     .1109673     .133089
+                        Portland  |   .2113334   .0033177    63.70   0.000     .2047828     .217884
+                    Poughkeepsie  |   .1002238   .0036045    27.81   0.000     .0931069    .1073407
+                      Providence  |   .1138032   .0013155    86.51   0.000     .1112059    .1164005
+                          Pueblo  |  -.0266273   .0042162    -6.32   0.000     -.034952   -.0183026
+                          Queens  |    .079604   .0027038    29.44   0.000     .0742655    .0849426
+                          Quincy  |  -.0028278   .0024501    -1.15   0.250    -.0076655    .0020098
+                          Racine  |  -.0565103   .0002182  -258.93   0.000    -.0569412   -.0560794
+                          Revere  |  -.0128728   .0053562    -2.40   0.017    -.0234482   -.0022973
+                        Richmond  |   .0919597    .001011    90.96   0.000     .0899636    .0939558
+                       Rochester  |   .1621251   .0033608    48.24   0.000     .1554893    .1687608
+                        Rockford  |   -.031092   .0049743    -6.25   0.000    -.0409135   -.0212706
+                      Sacramento  |   .1405604   .0033086    42.48   0.000     .1340277     .147093
+                         Saginaw  |   .0650281   .0023858    27.26   0.000     .0603174    .0697388
+                  Salt Lake City  |   .0987066   .0058446    16.89   0.000     .0871668    .1102464
+                     San Antonio  |    .078631   .0064655    12.16   0.000     .0658652    .0913967
+                       San Diego  |    .086021     .00636    13.53   0.000     .0734635    .0985786
+                   San Francisco  |   .1633553   .0061748    26.46   0.000     .1511635     .175547
+                        San Jose  |   .1207163   .0034891    34.60   0.000     .1138273    .1276053
+                        Savannah  |   .2216112   .0007736   286.48   0.000     .2200839    .2231386
+                     Schenectady  |  -.1229428   .0045866   -26.80   0.000    -.1319988   -.1138869
+                         Seattle  |    .220179   .0037249    59.11   0.000     .2128244    .2275336
+                      Shreveport  |   .0977223    .001936    50.48   0.000     .0938998    .1015448
+                      Sioux City  |  -.1688011   .0059802   -28.23   0.000    -.1806087   -.1569935
+                      Somerville  |   .2134427   .0034063    62.66   0.000     .2067172    .2201681
+                      South Bend  |   .0418898   .0010366    40.41   0.000     .0398431    .0439365
+                         Spokane  |   -.083167   .0014613   -56.91   0.000    -.0860522   -.0802818
+                     Springfield  |   -.006648   .0082422    -0.81   0.421    -.0229218    .0096257
+                      St. Joseph  |   -.178031   .0192877    -9.23   0.000    -.2161136   -.1399484
+                       St. Louis  |    .196387   .0036767    53.41   0.000     .1891276    .2036464
+                        St. Paul  |   .1474864   .0039933    36.93   0.000     .1396019    .1553709
+                  St. Petersburg  |   .0861872   .0050074    17.21   0.000     .0763003    .0960741
+Stamford, Darien, and New Canaan  |   .0554071   .0043742    12.67   0.000     .0467704    .0640437
+                   Staten Island  |  -.1355775   .0056874   -23.84   0.000     -.146807    -.124348
+                        Stockton  |   .0598006   .0024435    24.47   0.000      .054976    .0646251
+                        Syracuse  |   .0625485   .0005928   105.52   0.000     .0613781    .0637189
+                          Tacoma  |   .0118129   .0042479     2.78   0.006     .0034257    .0202002
+                           Tampa  |   .0293785   .0120402     2.44   0.016     .0056058    .0531512
+                     Terre Haute  |  -.0821028   .0041643   -19.72   0.000     -.090325   -.0738806
+                          Toledo  |   .0754829     .00138    54.70   0.000     .0727583    .0782076
+                          Topeka  |  -.0252782   .0037404    -6.76   0.000    -.0326635   -.0178929
+                         Trenton  |   .1486592   .0017436    85.26   0.000     .1452166    .1521019
+                           Tulsa  |   .0155051   .0057468     2.70   0.008     .0041583    .0268518
+                       Union Co.  |   .0627961   .0015514    40.48   0.000     .0597329    .0658592
+                           Utica  |  -.0654027   .0015069   -43.40   0.000    -.0683779   -.0624275
+                            Waco  |   .0375644   .0020167    18.63   0.000     .0335826    .0415462
+                          Warren  |  -.0517784   .0034817   -14.87   0.000    -.0586528    -.044904
+                       Waterbury  |   .0370982   .0024273    15.28   0.000     .0323057    .0418908
+                        Waterloo  |   .0003229   .0071992     0.04   0.964    -.0138916    .0145374
+                       Watertown  |   .0849855   .0058101    14.63   0.000     .0735139    .0964572
+                         Wichita  |  -.0596591   .0129059    -4.62   0.000     -.085141   -.0341772
+                    Wilkes-Barre  |  -.0678786    .005602   -12.12   0.000    -.0789395   -.0568178
+                   Winston-Salem  |   .1887663   .0071752    26.31   0.000     .1745993    .2029333
+                      Woonsocket  |   -.117624    .003131   -37.57   0.000     -.123806    -.111442
+                            York  |    .051306    .004152    12.36   0.000      .043108    .0595039
+                      Youngstown  |   .0589885   .0040414    14.60   0.000     .0510091     .066968
+                                  |
+                            _cons |   .6508363    .005602   116.18   0.000     .6397754    .6618972
+---------------------------------------------------------------------------------------------------
+
+. eststo reg_base_cube: regress tract_dvoteshare $indep_vars i.city2 
+> if incl == 1, cluster(city2);
+
+Linear regression                               Number of obs     =      6,026
+                                                F(5, 165)         =          .
+                                                Prob > F          =          .
+                                                R-squared         =     0.2892
+                                                Root MSE          =     .12737
+
+                                                     (Std. err. adjusted for 166 clusters in city2)
+---------------------------------------------------------------------------------------------------
+                                  |               Robust
+                 tract_dvoteshare | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+----------------------------------+----------------------------------------------------------------
+                     perc_tract_d |   .5159228   .0773815     6.67   0.000     .3631372    .6687085
+                  perc_tract_d_sq |  -1.228243   .2013706    -6.10   0.000    -1.625838   -.8306476
+                  perc_tract_d_cu |   .8027136   .1382262     5.81   0.000     .5297936    1.075634
+                     perc_tract_c |   .2050051   .0550567     3.72   0.000     .0962985    .3137116
+                  perc_tract_c_sq |  -.6036984   .1195279    -5.05   0.000    -.8396997    -.367697
+                  perc_tract_c_cu |   .4283361   .0800539     5.35   0.000      .270274    .5863982
+                                  |
+                            city2 |
+                          Albany  |   .1473148   .0041086    35.86   0.000     .1392026     .155427
+                         Altoona  |  -.3094285   .0025453  -121.57   0.000     -.314454    -.304403
+                        Amarillo  |  -.3017325   .0066651   -45.27   0.000    -.3148924   -.2885725
+                       Arlington  |   .1723081   .0031475    54.74   0.000     .1660936    .1785226
+                         Atlanta  |   .1661169   .0054522    30.47   0.000     .1553517     .176882
+                   Atlantic City  |   .1219279   .0082014    14.87   0.000     .1057347    .1381212
+                         Augusta  |   .2185302   .0201367    10.85   0.000     .1787713     .258289
+                          Aurora  |   .1026465   .0081711    12.56   0.000     .0865131      .11878
+                          Austin  |   .1499365   .0088218    17.00   0.000     .1325184    .1673547
+                       Baltimore  |   .2158011   .0068465    31.52   0.000     .2022831    .2293192
+                        Bay City  |  -.1183725   .0073047   -16.20   0.000    -.1327953   -.1039498
+                        Beaumont  |   .2255251   .0034292    65.77   0.000     .2187543     .232296
+                         Belmont  |   .1381803   .0023439    58.95   0.000     .1335524    .1428081
+                      Bergen Co.  |  -.0172047   .0015733   -10.94   0.000    -.0203111   -.0140983
+                      Birmingham  |   .1668912   .0076779    21.74   0.000     .1517317    .1820508
+                          Boston  |   .1685976   .0042572    39.60   0.000     .1601919    .1770033
+                        Brockton  |   .1616809   .0052618    30.73   0.000     .1512917    .1720702
+                           Bronx  |   .1436563   .0033942    42.32   0.000     .1369546     .150358
+                       Brookline  |   .2137805   .0046578    45.90   0.000     .2045839    .2229772
+                        Brooklyn  |   .0380959   .0053001     7.19   0.000     .0276312    .0485606
+                         Buffalo  |   .1521436   .0028857    52.72   0.000     .1464459    .1578413
+                       Cambridge  |   .1981219   .0051272    38.64   0.000     .1879985    .2082454
+                          Camden  |   .0306118   .0019689    15.55   0.000     .0267243    .0344993
+                          Canton  |   .0065422   .0026345     2.48   0.014     .0013405     .011744
+                       Charlotte  |   .0537318   .0050122    10.72   0.000     .0438354    .0636281
+                     Chattanooga  |    .057344   .0017665    32.46   0.000     .0538561    .0608319
+                         Chelsea  |   .0960423    .005079    18.91   0.000     .0860141    .1060705
+                         Chicago  |   .1755668    .003676    47.76   0.000     .1683086    .1828249
+                       Cleveland  |   .1336687   .0020754    64.41   0.000      .129571    .1377664
+                        Columbia  |   .0319103   .0090522     3.53   0.001     .0140373    .0497834
+                        Columbus  |   .1237553   .0020405    60.65   0.000     .1197265    .1277842
+                  Council Bluffs  |  -.2136142   .0089887   -23.76   0.000    -.2313619   -.1958665
+                          Dallas  |   .0515222   .0025231    20.42   0.000     .0465405    .0565038
+                       Davenport  |  -.0685366   .0012892   -53.16   0.000    -.0710821   -.0659911
+                          Dayton  |    .035594   .0027836    12.79   0.000     .0300981      .04109
+                         Decatur  |    .003126    .004101     0.76   0.447    -.0049711    .0112232
+                          Denver  |   .1678496   .0029011    57.86   0.000     .1621216    .1735777
+                      Des Moines  |   .0064997    .004016     1.62   0.107    -.0014296     .014429
+                         Detroit  |   .1414035   .0029717    47.58   0.000      .135536     .147271
+                         Dubuque  |  -.0924454   .0072995   -12.66   0.000    -.1068579    -.078033
+                          Duluth  |   .0924247   .0032543    28.40   0.000     .0859992    .0988502
+                          Durham  |   .2223566   .0087785    25.33   0.000      .205024    .2396892
+                  East St. Louis  |   .2592327   .0064951    39.91   0.000     .2464085    .2720569
+                         El Paso  |   .0669536   .0051062    13.11   0.000     .0568716    .0770355
+                          Elmira  |  -.1106255   .0035519   -31.15   0.000    -.1176386   -.1036124
+                            Erie  |  -.0018808   .0021259    -0.88   0.378    -.0060784    .0023167
+                       Essex Co.  |   .1731809   .0036548    47.39   0.000     .1659648     .180397
+                      Evansville  |  -.0371366   .0018784   -19.77   0.000    -.0408455   -.0334277
+                         Everett  |   .0123166   .0034148     3.61   0.000     .0055742    .0190591
+                           Flint  |   .2977286   .0023999   124.06   0.000     .2929902     .302467
+                      Fort Wayne  |   .0250574   .0057021     4.39   0.000      .013799    .0363158
+                      Fort Worth  |    .043372   .0063528     6.83   0.000     .0308286    .0559153
+                          Fresno  |   .0733279    .003171    23.12   0.000     .0670668    .0795889
+                       Galveston  |   .0077746   .0058329     1.33   0.184    -.0037421    .0192913
+                    Grand Rapids  |   .0493853   .0016704    29.56   0.000     .0460871    .0526835
+             Greater Kansas City  |     .12663   .0065442    19.35   0.000     .1137089     .139551
+                      Greensboro  |   .1673451   .0046548    35.95   0.000     .1581545    .1765357
+                      Harrisburg  |   .1761901   .0082848    21.27   0.000     .1598321    .1925481
+                        Hartford  |   .2038832   .0023897    85.32   0.000     .1991649    .2086015
+                Holyoke Chicopee  |  -.0520179   .0021377   -24.33   0.000    -.0562387    -.047797
+                         Houston  |   .1258977   .0059386    21.20   0.000     .1141722    .1376232
+                      Hudson Co.  |    .043069   .0063377     6.80   0.000     .0305556    .0555824
+                    Indianapolis  |    .050901   .0027534    18.49   0.000     .0454646    .0563374
+                         Jackson  |  -.0260997   .0033641    -7.76   0.000     -.032742   -.0194574
+                    Jacksonville  |   .0561285   .0093691     5.99   0.000     .0376297    .0746273
+                       Johnstown  |  -.2676851   .0049443   -54.14   0.000    -.2774473   -.2579229
+                          Joliet  |   .0091451   .0024118     3.79   0.000     .0043833     .013907
+                         Kenosha  |  -.1586297    .005667   -27.99   0.000    -.1698189   -.1474406
+                       Knoxville  |  -.0001255   .0053501    -0.02   0.981     -.010689     .010438
+                   Lake Co. Gary  |   .2302854   .0063271    36.40   0.000     .2177929     .242778
+                         Lansing  |    .063932   .0025331    25.24   0.000     .0589306    .0689335
+                            Lima  |  -.1184195   .0031611   -37.46   0.000     -.124661    -.112178
+                         Lincoln  |  -.0046584   .0023103    -2.02   0.045    -.0092201   -.0000968
+                     Little Rock  |    .200654   .0027123    73.98   0.000     .1952986    .2060094
+                     Los Angeles  |   .1141603   .0030223    37.77   0.000     .1081929    .1201277
+           Lower Westchester Co.  |    .022342   .0042929     5.20   0.000      .013866     .030818
+                           Macon  |    .097225   .0160402     6.06   0.000     .0655546    .1288954
+                         Madison  |   .1697361   .0025632    66.22   0.000     .1646753    .1747969
+                          Malden  |   .0156223    .008016     1.95   0.053    -.0002049    .0314494
+                      Manchester  |  -.1070837    .002946   -36.35   0.000    -.1129004    -.101267
+                       Manhattan  |   .1691035   .0114009    14.83   0.000     .1465931    .1916139
+                         Medford  |   .0482359   .0042702    11.30   0.000     .0398047    .0566672
+                         Melrose  |   .0631314   .0020426    30.91   0.000     .0590984    .0671645
+                         Memphis  |    .160785   .0065698    24.47   0.000     .1478134    .1737566
+                           Miami  |  -.0502073   .0026518   -18.93   0.000     -.055443   -.0449715
+                   Milwaukee Co.  |   .1389094     .00425    32.68   0.000      .130518    .1473008
+                     Minneapolis  |   .2043481   .0029745    68.70   0.000     .1984751    .2102212
+                          Mobile  |  -.0286714   .0060109    -4.77   0.000    -.0405395   -.0168032
+                      Montgomery  |   .0570625   .0075696     7.54   0.000     .0421167    .0720084
+                        Muskegon  |   .2329616   .0096942    24.03   0.000     .2138208    .2521023
+                       Nashville  |   .0325282   .0088795     3.66   0.000     .0149962    .0500603
+                     New Britain  |   .0223396   .0008512    26.24   0.000     .0206589    .0240203
+                      New Castle  |  -.1577166   .0057871   -27.25   0.000    -.1691429   -.1462903
+                       New Haven  |   .0261434   .0026041    10.04   0.000     .0210018     .031285
+                     New Orleans  |   .1658614   .0076292    21.74   0.000      .150798    .1809248
+                          Newton  |   .1692858    .002413    70.16   0.000     .1645216    .1740501
+                   Niagara Falls  |   .0431599   .0044617     9.67   0.000     .0343505    .0519694
+                         Norfolk  |   .1417592   .0062999    22.50   0.000     .1293204    .1541979
+                         Oakland  |   .2331162    .003973    58.68   0.000     .2252717    .2409607
+                           Ogden  |  -.1248001   .0034852   -35.81   0.000    -.1316814   -.1179187
+                   Oklahoma City  |   .0262378   .0021041    12.47   0.000     .0220834    .0303923
+                           Omaha  |    .058527   .0049555    11.81   0.000     .0487426    .0683114
+                         Oshkosh  |  -.1005523   .0109551    -9.18   0.000    -.1221826    -.078922
+       Pawtucket & Central Falls  |    .035931   .0044163     8.14   0.000     .0272112    .0446507
+                          Peoria  |    .127462    .005381    23.69   0.000     .1168375    .1380866
+                    Philadelphia  |   .1724625   .0075371    22.88   0.000     .1575809    .1873441
+                         Phoenix  |   .1226511    .005782    21.21   0.000     .1112348    .1340675
+                      Pittsburgh  |   .1184652   .0038294    30.94   0.000     .1109042    .1260261
+                         Pontiac  |   .1758099    .003339    52.65   0.000     .1692173    .1824025
+                     Port Arthur  |   .1296165   .0071245    18.19   0.000     .1155495    .1436835
+                        Portland  |   .2086801   .0028797    72.47   0.000     .2029942     .214366
+                    Poughkeepsie  |   .0866599   .0039137    22.14   0.000     .0789326    .0943873
+                      Providence  |   .1178645    .002382    49.48   0.000     .1131613    .1225677
+                          Pueblo  |  -.0299849   .0052017    -5.76   0.000    -.0402553   -.0197145
+                          Queens  |   .0822999   .0043489    18.92   0.000     .0737133    .0908865
+                          Quincy  |   .0065779   .0042845     1.54   0.127    -.0018816    .0150374
+                          Racine  |  -.0650615   .0022656   -28.72   0.000    -.0695348   -.0605883
+                          Revere  |  -.0028878   .0052279    -0.55   0.581      -.01321    .0074344
+                        Richmond  |   .0947932   .0020904    45.35   0.000     .0906658    .0989206
+                       Rochester  |   .1663195    .002858    58.20   0.000     .1606766    .1719623
+                        Rockford  |  -.0320662     .00532    -6.03   0.000    -.0425702   -.0215622
+                      Sacramento  |   .1522967   .0034776    43.79   0.000     .1454304     .159163
+                         Saginaw  |   .0751154   .0031718    23.68   0.000     .0688527     .081378
+                  Salt Lake City  |   .1053369   .0050488    20.86   0.000     .0953684    .1153054
+                     San Antonio  |   .0788138   .0054445    14.48   0.000     .0680639    .0895638
+                       San Diego  |    .089654   .0055713    16.09   0.000     .0786538    .1006542
+                   San Francisco  |   .1687974   .0054174    31.16   0.000     .1581011    .1794938
+                        San Jose  |   .1041785   .0047549    21.91   0.000     .0947902    .1135669
+                        Savannah  |   .2293429    .001629   140.79   0.000     .2261266    .2325593
+                     Schenectady  |  -.1190833   .0049085   -24.26   0.000    -.1287748   -.1093917
+                         Seattle  |   .2226855   .0030006    74.21   0.000      .216761      .22861
+                      Shreveport  |    .087315    .003138    27.82   0.000     .0811191    .0935108
+                      Sioux City  |  -.1680777    .005243   -32.06   0.000    -.1784296   -.1577257
+                      Somerville  |    .220482    .004912    44.89   0.000     .2107834    .2301805
+                      South Bend  |   .0542708   .0028553    19.01   0.000     .0486332    .0599084
+                         Spokane  |  -.0865132   .0018117   -47.75   0.000    -.0900904    -.082936
+                     Springfield  |  -.0122535   .0073501    -1.67   0.097    -.0267659    .0022589
+                      St. Joseph  |  -.1660442    .017381    -9.55   0.000    -.2003621   -.1317263
+                       St. Louis  |   .1986927   .0031522    63.03   0.000      .192469    .2049165
+                        St. Paul  |   .1457834   .0034968    41.69   0.000      .138879    .1526877
+                  St. Petersburg  |   .0970577   .0047209    20.56   0.000     .0877366    .1063788
+Stamford, Darien, and New Canaan  |   .0611514   .0035504    17.22   0.000     .0541414    .0681613
+                   Staten Island  |  -.1334017   .0046511   -28.68   0.000    -.1425851   -.1242183
+                        Stockton  |   .0545448   .0039014    13.98   0.000     .0468417    .0622478
+                        Syracuse  |   .0658838   .0018204    36.19   0.000     .0622896     .069478
+                          Tacoma  |   -.001027   .0051703    -0.20   0.843    -.0112355    .0091816
+                           Tampa  |   .0344343   .0106522     3.23   0.001      .013402    .0554666
+                     Terre Haute  |  -.0899293    .004404   -20.42   0.000    -.0986249   -.0812338
+                          Toledo  |   .0812353   .0022056    36.83   0.000     .0768805    .0855902
+                          Topeka  |  -.0547063   .0064017    -8.55   0.000    -.0673461   -.0420665
+                         Trenton  |   .1497406   .0025496    58.73   0.000     .1447064    .1547747
+                           Tulsa  |   .0234794    .004425     5.31   0.000     .0147425    .0322162
+                       Union Co.  |   .0649242   .0011017    58.93   0.000      .062749    .0670994
+                           Utica  |  -.0579522   .0014684   -39.47   0.000    -.0608515   -.0550529
+                            Waco  |   .0323149   .0026208    12.33   0.000     .0271403    .0374894
+                          Warren  |   -.060064   .0034349   -17.49   0.000    -.0668461    -.053282
+                       Waterbury  |   .0322287   .0030005    10.74   0.000     .0263045     .038153
+                        Waterloo  |   .0023173   .0063447     0.37   0.715    -.0102101    .0148446
+                       Watertown  |   .0899315   .0080636    11.15   0.000     .0740104    .1058526
+                         Wichita  |  -.0507482   .0109339    -4.64   0.000    -.0723365   -.0291599
+                    Wilkes-Barre  |  -.0602903   .0071245    -8.46   0.000    -.0743573   -.0462233
+                   Winston-Salem  |   .1807201   .0067314    26.85   0.000     .1674294    .1940108
+                      Woonsocket  |  -.1368815   .0073241   -18.69   0.000    -.1513427   -.1224204
+                            York  |   .0378794   .0057076     6.64   0.000       .02661    .0491487
+                      Youngstown  |   .0599951   .0033516    17.90   0.000     .0533774    .0666127
+                                  |
+                            _cons |   .6432479   .0071245    90.29   0.000      .629181    .6573149
+---------------------------------------------------------------------------------------------------
+
+. eststo reg_all_cov_lin: regress tract_dvoteshare perc_tract_d perc_tract_c 
+> _yr_median perc_hs_total-perc_pop_asian median_age i.city2 
+> if incl == 1, cluster(city2);
+
+Linear regression                               Number of obs     =      6,026
+                                                F(9, 165)         =          .
+                                                Prob > F          =          .
+                                                R-squared         =     0.7492
+                                                Root MSE          =     .07569
+
+                                                     (Std. err. adjusted for 166 clusters in city2)
+---------------------------------------------------------------------------------------------------
+                                  |               Robust
+                 tract_dvoteshare | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+----------------------------------+----------------------------------------------------------------
+                     perc_tract_d |   .0317171   .0176304     1.80   0.074    -.0030931    .0665273
+                     perc_tract_c |   .0157805   .0092501     1.71   0.090    -.0024833    .0340443
+                       _yr_median |   -.000021   .0002606    -0.08   0.936    -.0005355    .0004936
+                    perc_hs_total |   -.115918    .036951    -3.14   0.002    -.1888758   -.0429603
+               perc_somecol_total |   .0839193   .0836982     1.00   0.318    -.0813382    .2491769
+                  perc_bach_total |   .4624881   .1150778     4.02   0.000     .2352733    .6897029
+                   perc_pop_white |  -.5295181   .1479325    -3.58   0.000    -.8216028   -.2374334
+                   perc_pop_black |   .0529052   .0649679     0.81   0.417    -.0753704    .1811807
+                   perc_pop_asian |  -.3278099   .0620551    -5.28   0.000    -.4503343   -.2052855
+                       median_age |  -.0018358   .0005576    -3.29   0.001    -.0029367   -.0007348
+                                  |
+                            city2 |
+                          Albany  |  -.0222752    .035414    -0.63   0.530    -.0921983    .0476479
+                         Altoona  |   -.146592   .0229192    -6.40   0.000    -.1918447   -.1013393
+                        Amarillo  |  -.2864316   .0094438   -30.33   0.000    -.3050779   -.2677852
+                       Arlington  |   .0556368    .045517     1.22   0.223     -.034234    .1455077
+                         Atlanta  |  -.1020192   .0572882    -1.78   0.077    -.2151316    .0110932
+                   Atlantic City  |  -.1018267   .0529897    -1.92   0.056     -.206452    .0027986
+                         Augusta  |   .0686093    .047806     1.44   0.153     -.025781    .1629996
+                          Aurora  |  -.0418781   .0545221    -0.77   0.444     -.149529    .0657728
+                          Austin  |   .0099281   .0440867     0.23   0.822    -.0771188     .096975
+                       Baltimore  |  -.0472969   .0469977    -1.01   0.316    -.1400913    .0454975
+                        Bay City  |    .026963   .0101712     2.65   0.009     .0068805    .0470455
+                        Beaumont  |   .0117729   .0345324     0.34   0.734    -.0564095    .0799553
+                         Belmont  |   .0196393   .0494721     0.40   0.692    -.0780407    .1173193
+                      Bergen Co.  |  -.1550373   .0614702    -2.52   0.013    -.2764068   -.0336677
+                      Birmingham  |  -.0581472   .0445191    -1.31   0.193    -.1460477    .0297533
+                          Boston  |  -.0363672   .0584029    -0.62   0.534    -.1516805     .078946
+                        Brockton  |  -.0441633   .0472343    -0.93   0.351    -.1374249    .0490983
+                           Bronx  |  -.1111852   .0664459    -1.67   0.096     -.242379    .0200087
+                       Brookline  |    .005769   .0598967     0.10   0.923    -.1124936    .1240317
+                        Brooklyn  |  -.1329267   .0510045    -2.61   0.010    -.2336323   -.0322211
+                         Buffalo  |  -.0052057   .0281816    -0.18   0.854    -.0608488    .0504374
+                       Cambridge  |   .0178536    .060696     0.29   0.769    -.1019874    .1376946
+                          Camden  |   -.030876   .0279802    -1.10   0.271    -.0861213    .0243693
+                          Canton  |  -.0129559   .0036751    -3.53   0.001    -.0202123   -.0056996
+                       Charlotte  |  -.1346868   .0473236    -2.85   0.005    -.2281247   -.0412488
+                     Chattanooga  |  -.0602004    .016366    -3.68   0.000    -.0925141   -.0278866
+                         Chelsea  |   -.107429   .0730281    -1.47   0.143     -.251619    .0367611
+                         Chicago  |  -.0551798    .057877    -0.95   0.342    -.1694548    .0590952
+                       Cleveland  |   -.036703   .0318816    -1.15   0.251    -.0996515    .0262456
+                        Columbia  |  -.1052382   .0314622    -3.34   0.001    -.1673587   -.0431177
+                        Columbus  |   .0226287   .0181034     1.25   0.213    -.0131154    .0583728
+                  Council Bluffs  |  -.0256094   .0146682    -1.75   0.083    -.0545709    .0033522
+                          Dallas  |  -.1537352   .0516224    -2.98   0.003    -.2556608   -.0518096
+                       Davenport  |  -.0013164    .003672    -0.36   0.720    -.0085664    .0059337
+                          Dayton  |  -.0770617   .0174588    -4.41   0.000    -.1115331   -.0425903
+                         Decatur  |  -.0692921   .0048827   -14.19   0.000    -.0789329   -.0596514
+                          Denver  |   .0252954   .0450251     0.56   0.575    -.0636041     .114195
+                      Des Moines  |   .0138122   .0116209     1.19   0.236    -.0091327     .036757
+                         Detroit  |  -.0277248   .0314039    -0.88   0.379    -.0897301    .0342806
+                         Dubuque  |   .0065739   .0130575     0.50   0.615    -.0192074    .0323553
+                          Duluth  |   .0959922   .0054485    17.62   0.000     .0852344      .10675
+                          Durham  |  -.0530028   .0518859    -1.02   0.309    -.1554488    .0494431
+                  East St. Louis  |   -.046391   .0372175    -1.25   0.214    -.1198749    .0270929
+                         El Paso  |  -.0570972   .0483648    -1.18   0.239     -.152591    .0383965
+                          Elmira  |  -.0522822   .0104684    -4.99   0.000    -.0729514    -.031613
+                            Erie  |   .0386266   .0088055     4.39   0.000     .0212407    .0560125
+                       Essex Co.  |  -.0937692   .0611887    -1.53   0.127     -.214583    .0270446
+                      Evansville  |  -.0263306   .0027328    -9.63   0.000    -.0317265   -.0209347
+                         Everett  |  -.0878936   .0514351    -1.71   0.089    -.1894494    .0136622
+                           Flint  |  -.0138154   .0445014    -0.31   0.757     -.101681    .0740503
+                      Fort Wayne  |  -.0382068   .0145261    -2.63   0.009    -.0668879   -.0095257
+                      Fort Worth  |  -.0983821   .0421546    -2.33   0.021     -.181614   -.0151502
+                          Fresno  |  -.0846781   .0481261    -1.76   0.080    -.1797004    .0103441
+                       Galveston  |  -.0876898   .0311012    -2.82   0.005    -.1490973   -.0262822
+                    Grand Rapids  |  -.0496061   .0269145    -1.84   0.067    -.1027474    .0035351
+             Greater Kansas City  |  -.0137175   .0376231    -0.36   0.716    -.0880022    .0605672
+                      Greensboro  |  -.0699152   .0404656    -1.73   0.086    -.1498123    .0099818
+                      Harrisburg  |   .0052545   .0322963     0.16   0.871    -.0585128    .0690218
+                        Hartford  |  -.0353927   .0470739    -0.75   0.453    -.1283376    .0575522
+                Holyoke Chicopee  |  -.0223529   .0113499    -1.97   0.051    -.0447626    .0000568
+                         Houston  |  -.1132069    .055842    -2.03   0.044    -.2234639   -.0029499
+                      Hudson Co.  |  -.1549726   .0735615    -2.11   0.037    -.3002158   -.0097293
+                    Indianapolis  |  -.0549836   .0230627    -2.38   0.018    -.1005196   -.0094475
+                         Jackson  |  -.0384704    .002406   -15.99   0.000    -.0432209     -.03372
+                    Jacksonville  |  -.0448833   .0222054    -2.02   0.045    -.0887266     -.00104
+                       Johnstown  |  -.0502988   .0235879    -2.13   0.034    -.0968719   -.0037258
+                          Joliet  |  -.0679844   .0257796    -2.64   0.009    -.1188848   -.0170839
+                         Kenosha  |  -.0644757   .0072123    -8.94   0.000    -.0787159   -.0502354
+                       Knoxville  |   .0460692   .0034858    13.22   0.000     .0391866    .0529517
+                   Lake Co. Gary  |  -.0186669   .0622531    -0.30   0.765    -.1415824    .1042485
+                         Lansing  |   .0367272   .0144953     2.53   0.012      .008107    .0653475
+                            Lima  |  -.1235847   .0190359    -6.49   0.000      -.16117   -.0859993
+                         Lincoln  |  -.0115157   .0079185    -1.45   0.148    -.0271504    .0041191
+                     Little Rock  |  -.0254482   .0357814    -0.71   0.478    -.0960966    .0452001
+                     Los Angeles  |  -.0805537    .067983    -1.18   0.238    -.2147824    .0536749
+           Lower Westchester Co.  |   -.149396   .0606974    -2.46   0.015    -.2692396   -.0295523
+                           Macon  |  -.1625192   .0379629    -4.28   0.000    -.2374749   -.0875635
+                         Madison  |   .1214799   .0240068     5.06   0.000     .0740799      .16888
+                          Malden  |  -.0689672   .0521473    -1.32   0.188    -.1719292    .0339948
+                      Manchester  |  -.0442765   .0059899    -7.39   0.000    -.0561032   -.0324498
+                       Manhattan  |  -.0369665   .0709653    -0.52   0.603    -.1770837    .1031508
+                         Medford  |  -.0451771   .0438594    -1.03   0.304    -.1317751    .0414208
+                         Melrose  |  -.0047235   .0389164    -0.12   0.904    -.0815618    .0721148
+                         Memphis  |  -.0779227   .0378135    -2.06   0.041    -.1525835    -.003262
+                           Miami  |  -.3161812   .0789175    -4.01   0.000    -.4719995   -.1603628
+                   Milwaukee Co.  |  -.0266066   .0335158    -0.79   0.428    -.0927817    .0395685
+                     Minneapolis  |   .0490963   .0349215     1.41   0.162    -.0198544     .118047
+                          Mobile  |  -.2113572   .0357139    -5.92   0.000    -.2818723   -.1408421
+                      Montgomery  |  -.1178741   .0268474    -4.39   0.000    -.1708828   -.0648654
+                        Muskegon  |  -.0142285   .0394477    -0.36   0.719    -.0921158    .0636589
+                       Nashville  |  -.1076593   .0347319    -3.10   0.002    -.1762355   -.0390832
+                     New Britain  |   -.049802   .0237711    -2.10   0.038    -.0967368   -.0028672
+                      New Castle  |  -.0207087   .0282411    -0.73   0.464    -.0764693    .0350518
+                       New Haven  |  -.0539803   .0250278    -2.16   0.032    -.1033963   -.0045642
+                     New Orleans  |   -.045972   .0462192    -0.99   0.321    -.1372294    .0452853
+                          Newton  |   .0050711   .0609906     0.08   0.934    -.1153514    .1254937
+                   Niagara Falls  |  -.0049688   .0064412    -0.77   0.442    -.0176866     .007749
+                         Norfolk  |  -.0647606   .0411322    -1.57   0.117     -.145974    .0164527
+                         Oakland  |   .0147518   .0732328     0.20   0.841    -.1298424     .159346
+                           Ogden  |  -.1156889   .0153304    -7.55   0.000     -.145958   -.0854198
+                   Oklahoma City  |  -.0904149   .0340514    -2.66   0.009    -.1576474   -.0231823
+                           Omaha  |  -.0299021   .0171007    -1.75   0.082    -.0636665    .0038624
+                         Oshkosh  |   .0022512   .0082249     0.27   0.785    -.0139885    .0184909
+       Pawtucket & Central Falls  |  -.0182829   .0218157    -0.84   0.403    -.0613569    .0247911
+                          Peoria  |  -.0116413   .0216134    -0.54   0.591    -.0543159    .0310332
+                    Philadelphia  |  -.0187735   .0428328    -0.44   0.662    -.1033446    .0657976
+                         Phoenix  |  -.0174516   .0373413    -0.47   0.641      -.09118    .0562768
+                      Pittsburgh  |   .0134333   .0242333     0.55   0.580    -.0344141    .0612806
+                         Pontiac  |  -.0063144   .0279214    -0.23   0.821    -.0614436    .0488148
+                     Port Arthur  |  -.0914284   .0390303    -2.34   0.020    -.1684916   -.0143653
+                        Portland  |   .1104218   .0403418     2.74   0.007     .0307691    .1900744
+                    Poughkeepsie  |  -.0691033   .0413858    -1.67   0.097    -.1508174    .0126107
+                      Providence  |  -.0426627   .0468575    -0.91   0.364    -.1351804     .049855
+                          Pueblo  |  -.0435633   .0187133    -2.33   0.021    -.0805117    -.006615
+                          Queens  |  -.1032476   .0718197    -1.44   0.152    -.2450517    .0385565
+                          Quincy  |  -.0211294   .0379308    -0.56   0.578    -.0960216    .0537629
+                          Racine  |  -.0271671   .0059361    -4.58   0.000    -.0388876   -.0154466
+                          Revere  |  -.0334597   .0379269    -0.88   0.379    -.1083444    .0414249
+                        Richmond  |  -.0813394   .0380631    -2.14   0.034    -.1564929   -.0061859
+                       Rochester  |  -.0284234   .0338361    -0.84   0.402     -.095231    .0383842
+                        Rockford  |  -.0536334   .0141534    -3.79   0.000    -.0815784   -.0256883
+                      Sacramento  |  -.0096573   .0494941    -0.20   0.846    -.1073807     .088066
+                         Saginaw  |   -.026973   .0183818    -1.47   0.144    -.0632669    .0093209
+                  Salt Lake City  |      .0332   .0280006     1.19   0.237    -.0220857    .0884857
+                     San Antonio  |  -.0046607   .0407239    -0.11   0.909    -.0850679    .0757464
+                       San Diego  |  -.0718319    .060112    -1.19   0.234    -.1905198     .046856
+                   San Francisco  |  -.0057171   .0839453    -0.07   0.946    -.1714624    .1600283
+                        San Jose  |  -.0363972   .0673153    -0.54   0.589    -.1693077    .0965133
+                        Savannah  |   .0044598   .0273168     0.16   0.871    -.0494757    .0583952
+                     Schenectady  |  -.0887848   .0119223    -7.45   0.000    -.1123249   -.0652448
+                         Seattle  |   .0641745   .0558752     1.15   0.252    -.0461481     .174497
+                      Shreveport  |  -.1918545   .0537966    -3.57   0.000    -.2980729   -.0856361
+                      Sioux City  |  -.1427696   .0118038   -12.10   0.000    -.1660756   -.1194636
+                      Somerville  |   .0614106   .0493882     1.24   0.215    -.0361036    .1589248
+                      South Bend  |  -.0036545   .0129852    -0.28   0.779    -.0292931    .0219841
+                         Spokane  |  -.0446737   .0088218    -5.06   0.000    -.0620918   -.0272556
+                     Springfield  |  -.0315882   .0073844    -4.28   0.000    -.0461683   -.0170081
+                      St. Joseph  |  -.0456952    .011833    -3.86   0.000    -.0690589   -.0223316
+                       St. Louis  |  -.0251122   .0375473    -0.67   0.505    -.0992472    .0490229
+                        St. Paul  |   .0532025   .0295725     1.80   0.074    -.0051867    .1115918
+                  St. Petersburg  |  -.0556093   .0328341    -1.69   0.092    -.1204384    .0092199
+Stamford, Darien, and New Canaan  |  -.1655675   .0638918    -2.59   0.010    -.2917183   -.0394167
+                   Staten Island  |  -.2071164   .0439116    -4.72   0.000    -.2938176   -.1204153
+                        Stockton  |  -.0814034   .0470092    -1.73   0.085    -.1742206    .0114137
+                        Syracuse  |  -.0084128   .0119202    -0.71   0.481    -.0319487     .015123
+                          Tacoma  |  -.0047751   .0292992    -0.16   0.871    -.0626249    .0530747
+                           Tampa  |  -.1274011   .0455042    -2.80   0.006    -.2172466   -.0375556
+                     Terre Haute  |  -.0737855   .0041253   -17.89   0.000    -.0819307   -.0656403
+                          Toledo  |  -.0135166   .0146479    -0.92   0.357     -.042438    .0154048
+                          Topeka  |  -.0277817   .0101335    -2.74   0.007    -.0477897   -.0077738
+                         Trenton  |  -.0813929   .0545955    -1.49   0.138    -.1891888    .0264029
+                           Tulsa  |  -.0876747    .034556    -2.54   0.012    -.1559036   -.0194459
+                       Union Co.  |  -.1371816   .0634908    -2.16   0.032    -.2625407   -.0118226
+                           Utica  |  -.0583204   .0098998    -5.89   0.000     -.077867   -.0387738
+                            Waco  |  -.1210824   .0291061    -4.16   0.000    -.1785508   -.0636139
+                          Warren  |   .0522912   .0223486     2.34   0.020     .0081651    .0964173
+                       Waterbury  |  -.1233702   .0385276    -3.20   0.002    -.1994409   -.0472994
+                        Waterloo  |  -.0006032   .0067858    -0.09   0.929    -.0140015     .012795
+                       Watertown  |  -.0339286   .0465839    -0.73   0.467     -.125906    .0580488
+                         Wichita  |  -.1069204   .0272233    -3.93   0.000    -.1606714   -.0531694
+                    Wilkes-Barre  |  -.0675223   .0042186   -16.01   0.000    -.0758518   -.0591928
+                   Winston-Salem  |   -.032444   .0363433    -0.89   0.373     -.104202    .0393139
+                      Woonsocket  |  -.0909496   .0036209   -25.12   0.000    -.0980989   -.0838003
+                            York  |  -.0559262   .0327533    -1.71   0.090    -.1205958    .0087435
+                      Youngstown  |  -.0134492    .016362    -0.82   0.412     -.045755    .0188567
+                                  |
+                            _cons |    .986976   .0357802    27.58   0.000     .9163299    1.057622
+---------------------------------------------------------------------------------------------------
+
+. eststo reg_all_cov: regress tract_dvoteshare $indep_vars _yr_median 
+> perc_hs_total-perc_pop_asian median_age i.city2 
+> if incl == 1, cluster(city2);
+
+Linear regression                               Number of obs     =      6,026
+                                                F(13, 165)        =          .
+                                                Prob > F          =          .
+                                                R-squared         =     0.7498
+                                                Root MSE          =     .07563
+
+                                                     (Std. err. adjusted for 166 clusters in city2)
+---------------------------------------------------------------------------------------------------
+                                  |               Robust
+                 tract_dvoteshare | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+----------------------------------+----------------------------------------------------------------
+                     perc_tract_d |   .1160755   .0385311     3.01   0.003      .039998    .1921531
+                  perc_tract_d_sq |  -.2538612   .1093223    -2.32   0.021    -.4697122   -.0380102
+                  perc_tract_d_cu |   .1735945   .0728401     2.38   0.018     .0297757    .3174134
+                     perc_tract_c |   .1236515   .0365694     3.38   0.001     .0514472    .1958558
+                  perc_tract_c_sq |   -.291286   .0683605    -4.26   0.000    -.4262601   -.1563119
+                  perc_tract_c_cu |   .1880165   .0441222     4.26   0.000     .1008996    .2751334
+                       _yr_median |  -.0000139   .0002628    -0.05   0.958    -.0005328    .0005049
+                    perc_hs_total |  -.1167697   .0369942    -3.16   0.002    -.1898128   -.0437265
+               perc_somecol_total |   .0846405   .0831562     1.02   0.310    -.0795469    .2488278
+                  perc_bach_total |   .4606368   .1148538     4.01   0.000     .2338643    .6874093
+                   perc_pop_white |  -.5279837   .1483539    -3.56   0.000    -.8209003    -.235067
+                   perc_pop_black |   .0534736   .0651189     0.82   0.413    -.0751003    .1820474
+                   perc_pop_asian |  -.3264755    .062135    -5.25   0.000    -.4491577   -.2037932
+                       median_age |   -.001824   .0005561    -3.28   0.001    -.0029221   -.0007259
+                                  |
+                            city2 |
+                          Albany  |  -.0203686   .0354485    -0.57   0.566    -.0903597    .0496224
+                         Altoona  |  -.1438374   .0223072    -6.45   0.000    -.1878818   -.0997931
+                        Amarillo  |  -.2843231   .0086529   -32.86   0.000    -.3014079   -.2672384
+                       Arlington  |   .0507252   .0463924     1.09   0.276    -.0408741    .1423245
+                         Atlanta  |  -.1001595   .0570008    -1.76   0.081    -.2127044    .0123855
+                   Atlantic City  |  -.0998188   .0525656    -1.90   0.059    -.2036067    .0039692
+                         Augusta  |   .0701965     .04678     1.50   0.135    -.0221681    .1625611
+                          Aurora  |  -.0414561     .05455    -0.76   0.448    -.1491622    .0662499
+                          Austin  |   .0128142   .0431616     0.30   0.767    -.0724061    .0980344
+                       Baltimore  |  -.0455455   .0460333    -0.99   0.324    -.1364356    .0453447
+                        Bay City  |   .0311014    .012094     2.57   0.011     .0072225    .0549803
+                        Beaumont  |   .0095961   .0347176     0.28   0.783    -.0589519    .0781442
+                         Belmont  |   .0217445   .0492788     0.44   0.660    -.0755539    .1190428
+                      Bergen Co.  |  -.1532555   .0611363    -2.51   0.013    -.2739658   -.0325452
+                      Birmingham  |  -.0579066   .0442785    -1.31   0.193    -.1453321     .029519
+                          Boston  |  -.0351027   .0577151    -0.61   0.544     -.149058    .0788526
+                        Brockton  |  -.0420686   .0468091    -0.90   0.370    -.1344906    .0503533
+                           Bronx  |  -.1090168   .0656196    -1.66   0.099    -.2385791    .0205455
+                       Brookline  |    .007556   .0594935     0.13   0.899    -.1099107    .1250227
+                        Brooklyn  |  -.1309059   .0502529    -2.60   0.010    -.2301275   -.0316843
+                         Buffalo  |  -.0008663   .0277062    -0.03   0.975    -.0555707    .0538382
+                       Cambridge  |   .0198962   .0600444     0.33   0.741    -.0986581    .1384506
+                          Camden  |  -.0281519   .0281945    -1.00   0.320    -.0838204    .0275166
+                          Canton  |  -.0139424   .0033261    -4.19   0.000    -.0205095   -.0073753
+                       Charlotte  |  -.1347184   .0470553    -2.86   0.005    -.2276266   -.0418103
+                     Chattanooga  |  -.0565831   .0161523    -3.50   0.001     -.088475   -.0246913
+                         Chelsea  |  -.1062419   .0725075    -1.47   0.145     -.249404    .0369202
+                         Chicago  |  -.0536552   .0569944    -0.94   0.348    -.1661876    .0588771
+                       Cleveland  |  -.0352593   .0315191    -1.12   0.265    -.0974921    .0269735
+                        Columbia  |  -.1124027   .0315004    -3.57   0.000    -.1745986   -.0502068
+                        Columbus  |   .0225386   .0184251     1.22   0.223    -.0138407    .0589179
+                  Council Bluffs  |   -.027541   .0167812    -1.64   0.103    -.0606746    .0055926
+                          Dallas  |  -.1504263   .0514186    -2.93   0.004    -.2519495    -.048903
+                       Davenport  |  -.0009369   .0038259    -0.24   0.807     -.008491    .0066171
+                          Dayton  |  -.0753465   .0174023    -4.33   0.000    -.1097065   -.0409865
+                         Decatur  |  -.0711985    .006343   -11.22   0.000    -.0837224   -.0586747
+                          Denver  |   .0270101   .0445872     0.61   0.545    -.0610249     .115045
+                      Des Moines  |   .0144773   .0111136     1.30   0.195    -.0074658    .0364205
+                         Detroit  |    -.02587   .0305353    -0.85   0.398    -.0861603    .0344204
+                         Dubuque  |   .0030735   .0147863     0.21   0.836    -.0261212    .0322681
+                          Duluth  |   .0927255   .0053933    17.19   0.000     .0820768    .1033742
+                          Durham  |  -.0534533   .0521914    -1.02   0.307    -.1565023    .0495958
+                  East St. Louis  |  -.0486288   .0373393    -1.30   0.195    -.1223533    .0250957
+                         El Paso  |  -.0587263   .0484022    -1.21   0.227    -.1542939    .0368412
+                          Elmira  |  -.0529661   .0101411    -5.22   0.000    -.0729891   -.0329432
+                            Erie  |   .0388597   .0089606     4.34   0.000     .0211675    .0565519
+                       Essex Co.  |  -.0924406   .0609402    -1.52   0.131    -.2127637    .0278824
+                      Evansville  |    -.02653   .0028361    -9.35   0.000    -.0321298   -.0209302
+                         Everett  |  -.0871846   .0509968    -1.71   0.089     -.187875    .0135058
+                           Flint  |  -.0110921    .045053    -0.25   0.806    -.1000469    .0778626
+                      Fort Wayne  |   -.035671   .0171121    -2.08   0.039    -.0694579    -.001884
+                      Fort Worth  |  -.0988948   .0417946    -2.37   0.019     -.181416   -.0163737
+                          Fresno  |   -.081621   .0486149    -1.68   0.095    -.1776084    .0143664
+                       Galveston  |  -.0838518   .0299855    -2.80   0.006    -.1430565   -.0246471
+                    Grand Rapids  |  -.0499198   .0269889    -1.85   0.066    -.1032079    .0033684
+             Greater Kansas City  |  -.0127757   .0374121    -0.34   0.733    -.0866437    .0610924
+                      Greensboro  |  -.0753468   .0422251    -1.78   0.076    -.1587181    .0080244
+                      Harrisburg  |   .0054163   .0305759     0.18   0.860    -.0549541    .0657867
+                        Hartford  |  -.0320513   .0466788    -0.69   0.493     -.124216    .0601134
+                Holyoke Chicopee  |  -.0238933    .011346    -2.11   0.037    -.0462955   -.0014912
+                         Houston  |  -.1083223   .0550485    -1.97   0.051    -.2170126     .000368
+                      Hudson Co.  |  -.1533172   .0729975    -2.10   0.037    -.2974468   -.0091875
+                    Indianapolis  |  -.0546834   .0224711    -2.43   0.016    -.0990513   -.0103155
+                         Jackson  |   -.037747   .0023025   -16.39   0.000    -.0422931   -.0332009
+                    Jacksonville  |  -.0487088   .0222394    -2.19   0.030    -.0926194   -.0047983
+                       Johnstown  |  -.0502739   .0237318    -2.12   0.036    -.0971311   -.0034167
+                          Joliet  |  -.0683216   .0261256    -2.62   0.010    -.1199051   -.0167381
+                         Kenosha  |  -.0647258   .0069178    -9.36   0.000    -.0783846    -.051067
+                       Knoxville  |   .0471873   .0036968    12.76   0.000     .0398883    .0544864
+                   Lake Co. Gary  |  -.0116836   .0622624    -0.19   0.851    -.1346172    .1112501
+                         Lansing  |   .0374485   .0139431     2.69   0.008     .0099186    .0649785
+                            Lima  |  -.1188008   .0196738    -6.04   0.000    -.1576455    -.079956
+                         Lincoln  |  -.0120375   .0085508    -1.41   0.161    -.0289206    .0048457
+                     Little Rock  |  -.0298712   .0357605    -0.84   0.405    -.1004785     .040736
+                     Los Angeles  |  -.0787898   .0673221    -1.17   0.244    -.2117137     .054134
+           Lower Westchester Co.  |  -.1472574   .0600575    -2.45   0.015    -.2658377    -.028677
+                           Macon  |  -.1592907   .0367128    -4.34   0.000    -.2317781   -.0868033
+                         Madison  |   .1222235   .0230949     5.29   0.000     .0766239    .1678231
+                          Malden  |  -.0683455   .0516234    -1.32   0.187    -.1702732    .0335821
+                      Manchester  |  -.0459016   .0055489    -8.27   0.000    -.0568575   -.0349456
+                       Manhattan  |  -.0335682   .0699942    -0.48   0.632    -.1717679    .1046316
+                         Medford  |  -.0417555   .0436909    -0.96   0.341    -.1280207    .0445098
+                         Melrose  |  -.0046889    .039711    -0.12   0.906    -.0830961    .0737184
+                         Memphis  |  -.0768594   .0375007    -2.05   0.042    -.1509025   -.0028163
+                           Miami  |  -.3137822   .0788125    -3.98   0.000    -.4693932   -.1581712
+                   Milwaukee Co.  |   -.025135   .0328881    -0.76   0.446    -.0900708    .0398008
+                     Minneapolis  |   .0487921   .0344142     1.42   0.158    -.0191569     .116741
+                          Mobile  |   -.207979   .0361584    -5.75   0.000    -.2793719   -.1365862
+                      Montgomery  |    -.11664   .0260983    -4.47   0.000    -.1681696   -.0651104
+                        Muskegon  |  -.0147073   .0381758    -0.39   0.701    -.0900833    .0606687
+                       Nashville  |  -.1063053    .034027    -3.12   0.002    -.1734897   -.0391208
+                     New Britain  |  -.0490709   .0236867    -2.07   0.040    -.0958389   -.0023028
+                      New Castle  |  -.0162083   .0288016    -0.56   0.574    -.0730755     .040659
+                       New Haven  |   -.053937   .0261005    -2.07   0.040    -.1054709    -.002403
+                     New Orleans  |  -.0450143   .0459154    -0.98   0.328    -.1356718    .0456432
+                          Newton  |   .0084796   .0612809     0.14   0.890    -.1125163    .1294754
+                   Niagara Falls  |  -.0002048   .0055277    -0.04   0.970    -.0111189    .0107093
+                         Norfolk  |   -.062554    .040711    -1.54   0.126    -.1429357    .0178276
+                         Oakland  |   .0170235   .0731543     0.23   0.816    -.1274157    .1614627
+                           Ogden  |  -.1137638   .0148426    -7.66   0.000    -.1430698   -.0844579
+                   Oklahoma City  |  -.0880874   .0335379    -2.63   0.009    -.1543063   -.0218686
+                           Omaha  |  -.0262351   .0163391    -1.61   0.110    -.0584957    .0060256
+                         Oshkosh  |   .0033071   .0101381     0.33   0.745    -.0167099    .0233242
+       Pawtucket & Central Falls  |  -.0140215   .0211786    -0.66   0.509    -.0558374    .0277944
+                          Peoria  |  -.0076697   .0216259    -0.35   0.723    -.0503689    .0350296
+                    Philadelphia  |  -.0162663   .0420652    -0.39   0.699    -.0993217    .0667891
+                         Phoenix  |  -.0143902   .0367804    -0.39   0.696    -.0870111    .0582306
+                      Pittsburgh  |   .0146901   .0237844     0.62   0.538    -.0322708    .0616511
+                         Pontiac  |   -.006949   .0280646    -0.25   0.805     -.062361    .0484631
+                     Port Arthur  |    -.08609    .037742    -2.28   0.024    -.1606095   -.0115704
+                        Portland  |   .1099948   .0399748     2.75   0.007     .0310667    .1889229
+                    Poughkeepsie  |  -.0753942   .0415845    -1.81   0.072    -.1575006    .0067122
+                      Providence  |  -.0411591   .0466958    -0.88   0.379    -.1333574    .0510391
+                          Pueblo  |  -.0423495   .0179702    -2.36   0.020    -.0778308   -.0068683
+                          Queens  |  -.1016939    .070752    -1.44   0.153    -.2413898     .038002
+                          Quincy  |  -.0195548   .0376903    -0.52   0.605    -.0939722    .0548626
+                          Racine  |  -.0310024   .0063237    -4.90   0.000    -.0434883   -.0185166
+                          Revere  |  -.0329168   .0374484    -0.88   0.381    -.1068567    .0410231
+                        Richmond  |  -.0809247   .0378315    -2.14   0.034    -.1556209   -.0062285
+                       Rochester  |  -.0263169   .0332011    -0.79   0.429    -.0918707     .039237
+                        Rockford  |  -.0533232   .0147722    -3.61   0.000      -.08249   -.0241563
+                      Sacramento  |  -.0042044   .0501051    -0.08   0.933    -.1031342    .0947254
+                         Saginaw  |  -.0244177    .018781    -1.30   0.195    -.0614998    .0126644
+                  Salt Lake City  |   .0363613   .0274414     1.33   0.187    -.0178203    .0905429
+                     San Antonio  |  -.0037549   .0401356    -0.09   0.926    -.0830004    .0754906
+                       San Diego  |  -.0700686   .0595678    -1.18   0.241    -.1876819    .0475447
+                   San Francisco  |  -.0036489   .0835933    -0.04   0.965    -.1686993    .1614014
+                        San Jose  |  -.0409021   .0672702    -0.61   0.544    -.1737235    .0919193
+                        Savannah  |   .0068437   .0279143     0.25   0.807    -.0482715    .0619589
+                     Schenectady  |     -.0859   .0114507    -7.50   0.000    -.1085088   -.0632912
+                         Seattle  |   .0648382   .0555094     1.17   0.244     -.044762    .1744384
+                      Shreveport  |  -.1941719   .0542687    -3.58   0.000    -.3013224   -.0870214
+                      Sioux City  |  -.1437204   .0120366   -11.94   0.000     -.167486   -.1199549
+                      Somerville  |   .0634347   .0490172     1.29   0.197     -.033347    .1602165
+                      South Bend  |   .0011854   .0128248     0.09   0.926    -.0241365    .0265072
+                         Spokane  |   -.045331   .0087538    -5.18   0.000    -.0626149   -.0280471
+                     Springfield  |   -.034395   .0072804    -4.72   0.000    -.0487697   -.0200203
+                      St. Joseph  |  -.0412601   .0130445    -3.16   0.002    -.0670158   -.0155045
+                       St. Louis  |  -.0237416   .0370073    -0.64   0.522    -.0968105    .0493274
+                        St. Paul  |   .0533524   .0289334     1.84   0.067    -.0037751    .1104799
+                  St. Petersburg  |   -.052626   .0331948    -1.59   0.115    -.1181673    .0129152
+Stamford, Darien, and New Canaan  |  -.1637727    .063954    -2.56   0.011    -.2900465   -.0374989
+                   Staten Island  |  -.2063486   .0436301    -4.73   0.000    -.2924938   -.1202034
+                        Stockton  |  -.0874919    .048445    -1.81   0.073    -.1831439    .0081602
+                        Syracuse  |  -.0056947   .0116066    -0.49   0.624    -.0286113    .0172218
+                          Tacoma  |  -.0077456   .0292943    -0.26   0.792    -.0655857    .0500945
+                           Tampa  |  -.1262389   .0450192    -2.80   0.006    -.2151268   -.0373511
+                     Terre Haute  |  -.0743703   .0044079   -16.87   0.000    -.0830734   -.0656672
+                          Toledo  |  -.0113845   .0140872    -0.81   0.420     -.039199    .0164299
+                          Topeka  |  -.0360602   .0099994    -3.61   0.000    -.0558035   -.0163169
+                         Trenton  |  -.0808347   .0544946    -1.48   0.140    -.1884314     .026762
+                           Tulsa  |   -.085513   .0341116    -2.51   0.013    -.1528645   -.0181616
+                       Union Co.  |  -.1365458   .0634586    -2.15   0.033    -.2618413   -.0112502
+                           Utica  |  -.0564833   .0099246    -5.69   0.000    -.0760789   -.0368876
+                            Waco  |  -.1221889   .0295215    -4.14   0.000    -.1804774   -.0639004
+                          Warren  |   .0457887   .0220104     2.08   0.039     .0023303    .0892471
+                       Waterbury  |  -.1240743   .0389922    -3.18   0.002    -.2010622   -.0470864
+                        Waterloo  |   .0006388   .0064174     0.10   0.921    -.0120321    .0133097
+                       Watertown  |  -.0317399   .0454709    -0.70   0.486    -.1215197    .0580399
+                         Wichita  |  -.1041823   .0265968    -3.92   0.000    -.1566962   -.0516684
+                    Wilkes-Barre  |  -.0625119   .0048912   -12.78   0.000    -.0721693   -.0528545
+                   Winston-Salem  |  -.0349967   .0364938    -0.96   0.339    -.1070518    .0370584
+                      Woonsocket  |  -.0915025   .0050489   -18.12   0.000    -.1014713   -.0815337
+                            York  |  -.0572799     .03318    -1.73   0.086     -.122792    .0082321
+                      Youngstown  |  -.0138072   .0162373    -0.85   0.396    -.0458668    .0182525
+                                  |
+                            _cons |   .9805841   .0353249    27.76   0.000     .9108371    1.050331
+---------------------------------------------------------------------------------------------------
+
+. eststo reg_all_cov_no_c: regress tract_dvoteshare perc_tract_d perc_tract_d_sq 
+> perc_tract_d_cu _yr_median perc_hs_total-perc_pop_asian median_age i.city2 
+> if incl == 1, cluster(city2);
+
+Linear regression                               Number of obs     =      6,026
+                                                F(10, 165)        =          .
+                                                Prob > F          =          .
+                                                R-squared         =     0.7484
+                                                Root MSE          =     .07581
+
+                                                     (Std. err. adjusted for 166 clusters in city2)
+---------------------------------------------------------------------------------------------------
+                                  |               Robust
+                 tract_dvoteshare | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+----------------------------------+----------------------------------------------------------------
+                     perc_tract_d |   .0803352   .0433768     1.85   0.066      -.00531    .1659805
+                  perc_tract_d_sq |  -.1350101    .096219    -1.40   0.162    -.3249893     .054969
+                  perc_tract_d_cu |   .0762234   .0646914     1.18   0.240    -.0515063    .2039531
+                       _yr_median |  -.0000528   .0002487    -0.21   0.832    -.0005438    .0004381
+                    perc_hs_total |  -.1153363   .0368934    -3.13   0.002    -.1881802   -.0424924
+               perc_somecol_total |   .0774424   .0811637     0.95   0.341     -.082811    .2376958
+                  perc_bach_total |   .4582826   .1138418     4.03   0.000     .2335081    .6830571
+                   perc_pop_white |  -.5283435   .1485038    -3.56   0.000    -.8215563   -.2351307
+                   perc_pop_black |   .0527803   .0657978     0.80   0.424    -.0771339    .1826944
+                   perc_pop_asian |  -.3263545   .0613626    -5.32   0.000    -.4475116   -.2051974
+                       median_age |  -.0019196   .0005321    -3.61   0.000    -.0029702    -.000869
+                                  |
+                            city2 |
+                          Albany  |  -.0212676   .0356989    -0.60   0.552    -.0917532     .049218
+                         Altoona  |  -.1443279   .0238759    -6.04   0.000    -.1914695   -.0971863
+                        Amarillo  |   -.291217   .0122193   -23.83   0.000    -.3153435   -.2670906
+                       Arlington  |   .0559984   .0462673     1.21   0.228    -.0353538    .1473507
+                         Atlanta  |  -.0964484   .0556536    -1.73   0.085    -.2063335    .0134366
+                   Atlantic City  |  -.0986373   .0522499    -1.89   0.061    -.2018019    .0045274
+                         Augusta  |   .0726276   .0470147     1.54   0.124    -.0202003    .1654555
+                          Aurora  |  -.0421453   .0554155    -0.76   0.448    -.1515601    .0672695
+                          Austin  |   .0090321   .0452875     0.20   0.842    -.0803855    .0984497
+                       Baltimore  |   -.044952   .0465506    -0.97   0.336    -.1368635    .0469596
+                        Bay City  |   .0251498   .0099917     2.52   0.013     .0054217    .0448779
+                        Beaumont  |   .0059692   .0375176     0.16   0.874    -.0681072    .0800456
+                         Belmont  |    .023941   .0484517     0.49   0.622    -.0717244    .1196063
+                      Bergen Co.  |  -.1499585   .0599475    -2.50   0.013    -.2683216   -.0315954
+                      Birmingham  |  -.0558951   .0440151    -1.27   0.206    -.1428006    .0310104
+                          Boston  |  -.0300346   .0564195    -0.53   0.595    -.1414318    .0813627
+                        Brockton  |  -.0385896   .0454819    -0.85   0.397    -.1283913     .051212
+                           Bronx  |  -.1067031   .0653687    -1.63   0.105    -.2357701    .0223639
+                       Brookline  |   .0133308   .0575538     0.23   0.817     -.100306    .1269676
+                        Brooklyn  |  -.1300652   .0505109    -2.57   0.011    -.2297962   -.0303342
+                         Buffalo  |  -.0054966   .0287835    -0.19   0.849    -.0623281    .0513349
+                       Cambridge  |   .0242688   .0586721     0.41   0.680     -.091576    .1401137
+                          Camden  |  -.0292277   .0279209    -1.05   0.297     -.084356    .0259006
+                          Canton  |  -.0164795   .0031098    -5.30   0.000    -.0226196   -.0103394
+                       Charlotte  |  -.1328942   .0469463    -2.83   0.005     -.225587   -.0402013
+                     Chattanooga  |  -.0612989   .0169166    -3.62   0.000    -.0946998    -.027898
+                         Chelsea  |  -.1023776   .0719667    -1.42   0.157    -.2444719    .0397168
+                         Chicago  |  -.0488713   .0558924    -0.87   0.383    -.1592278    .0614851
+                       Cleveland  |   -.035625   .0317863    -1.12   0.264    -.0983852    .0271353
+                        Columbia  |  -.1072471   .0322636    -3.32   0.001    -.1709499   -.0435443
+                        Columbus  |   .0229141   .0182185     1.26   0.210    -.0130573    .0588855
+                  Council Bluffs  |  -.0305334   .0132294    -2.31   0.022    -.0566541   -.0044127
+                          Dallas  |  -.1495211   .0505762    -2.96   0.004    -.2493811   -.0496612
+                       Davenport  |   .0016824   .0036677     0.46   0.647    -.0055594    .0089242
+                          Dayton  |  -.0796318   .0186444    -4.27   0.000    -.1164442   -.0428194
+                         Decatur  |   -.071245   .0054182   -13.15   0.000    -.0819429    -.060547
+                          Denver  |   .0318173     .04284     0.74   0.459    -.0527679    .1164025
+                      Des Moines  |   .0135403    .012023     1.13   0.262    -.0101985    .0372792
+                         Detroit  |  -.0241591   .0303528    -0.80   0.427    -.0840891    .0357708
+                         Dubuque  |  -.0012012   .0100679    -0.12   0.905    -.0210796    .0186773
+                          Duluth  |   .0929709   .0059846    15.54   0.000     .0811546    .1047872
+                          Durham  |   -.051275   .0520566    -0.98   0.326    -.1540579     .051508
+                  East St. Louis  |   -.047867   .0379376    -1.26   0.209    -.1227726    .0270387
+                         El Paso  |  -.0600717   .0502455    -1.20   0.234    -.1592787    .0391353
+                          Elmira  |  -.0559732   .0093311    -6.00   0.000     -.074397   -.0375494
+                            Erie  |   .0353262   .0079566     4.44   0.000     .0196163    .0510361
+                       Essex Co.  |  -.0913572   .0607302    -1.50   0.134    -.2112657    .0285514
+                      Evansville  |  -.0248937   .0021765   -11.44   0.000     -.029191   -.0205963
+                         Everett  |  -.0831629   .0496035    -1.68   0.096    -.1811023    .0147766
+                           Flint  |  -.0111388   .0438462    -0.25   0.800    -.0977108    .0754332
+                      Fort Wayne  |  -.0367384   .0145574    -2.52   0.013    -.0654811   -.0079957
+                      Fort Worth  |  -.1017682   .0441703    -2.30   0.022    -.1889802   -.0145563
+                          Fresno  |  -.0811354    .047294    -1.72   0.088    -.1745148    .0122439
+                       Galveston  |  -.0909383   .0330019    -2.76   0.007    -.1560988   -.0257777
+                    Grand Rapids  |  -.0459736   .0256155    -1.79   0.075    -.0965501    .0046029
+             Greater Kansas City  |  -.0110054   .0369141    -0.30   0.766    -.0838904    .0618795
+                      Greensboro  |  -.0703593   .0408137    -1.72   0.087    -.1509437     .010225
+                      Harrisburg  |  -.0017744    .035293    -0.05   0.960    -.0714586    .0679098
+                        Hartford  |  -.0330506   .0467791    -0.71   0.481    -.1254133    .0593121
+                Holyoke Chicopee  |  -.0223599   .0107334    -2.08   0.039    -.0435525   -.0011674
+                         Houston  |  -.1141213   .0570614    -2.00   0.047    -.2267859   -.0014567
+                      Hudson Co.  |  -.1500729   .0722439    -2.08   0.039    -.2927147   -.0074312
+                    Indianapolis  |  -.0520494   .0221152    -2.35   0.020    -.0957148   -.0083841
+                         Jackson  |  -.0394358   .0027406   -14.39   0.000    -.0448469   -.0340248
+                    Jacksonville  |  -.0461304   .0228348    -2.02   0.045    -.0912166   -.0010443
+                       Johnstown  |  -.0509631    .024315    -2.10   0.038    -.0989717   -.0029545
+                          Joliet  |  -.0705963   .0273346    -2.58   0.011    -.1245669   -.0166257
+                         Kenosha  |  -.0647692   .0059913   -10.81   0.000    -.0765987   -.0529398
+                       Knoxville  |   .0489562   .0031194    15.69   0.000     .0427972    .0551153
+                   Lake Co. Gary  |  -.0110014   .0596227    -0.18   0.854    -.1287233    .1067204
+                         Lansing  |   .0402946   .0129747     3.11   0.002     .0146767    .0659125
+                            Lima  |  -.1256269   .0181205    -6.93   0.000    -.1614048    -.089849
+                         Lincoln  |  -.0131979   .0088992    -1.48   0.140    -.0307689    .0043731
+                     Little Rock  |  -.0248208   .0356821    -0.70   0.488    -.0952732    .0456317
+                     Los Angeles  |  -.0758916   .0668277    -1.14   0.258    -.2078392     .056056
+           Lower Westchester Co.  |  -.1499599   .0615509    -2.44   0.016    -.2714888   -.0284309
+                           Macon  |  -.1602099   .0376532    -4.25   0.000    -.2345542   -.0858657
+                         Madison  |   .1245664   .0228526     5.45   0.000     .0794452    .1696875
+                          Malden  |  -.0638525   .0506632    -1.26   0.209    -.1638841    .0361792
+                      Manchester  |   -.044168   .0048938    -9.03   0.000    -.0538306   -.0345054
+                       Manhattan  |  -.0337809   .0706738    -0.48   0.633    -.1733224    .1057606
+                         Medford  |  -.0373526   .0410403    -0.91   0.364    -.1183844    .0436793
+                         Melrose  |  -.0009712   .0380132    -0.03   0.980    -.0760262    .0740839
+                         Memphis  |  -.0766449   .0376955    -2.03   0.044    -.1510725   -.0022172
+                           Miami  |  -.3136491    .078737    -3.98   0.000    -.4691111   -.1581871
+                   Milwaukee Co.  |  -.0242754   .0329327    -0.74   0.462    -.0892993    .0407484
+                     Minneapolis  |     .04816   .0357152     1.35   0.179    -.0223578    .1186777
+                          Mobile  |  -.2072142   .0343252    -6.04   0.000    -.2749874   -.1394409
+                      Montgomery  |  -.1164531   .0266526    -4.37   0.000    -.1690772   -.0638289
+                        Muskegon  |  -.0143536   .0401255    -0.36   0.721    -.0935791     .064872
+                       Nashville  |  -.1063831   .0348549    -3.05   0.003    -.1752022    -.037564
+                     New Britain  |  -.0505303   .0246099    -2.05   0.042    -.0991212   -.0019395
+                      New Castle  |  -.0152081    .030323    -0.50   0.617    -.0750792    .0446629
+                       New Haven  |  -.0524201   .0247784    -2.12   0.036    -.1013438   -.0034965
+                     New Orleans  |  -.0428013    .045355    -0.94   0.347    -.1323524    .0467498
+                          Newton  |   .0108743   .0593992     0.18   0.855    -.1064062    .1281549
+                   Niagara Falls  |  -.0072996   .0070954    -1.03   0.305     -.021309    .0067099
+                         Norfolk  |  -.0608171   .0401772    -1.51   0.132    -.1401448    .0185107
+                         Oakland  |   .0177355    .072829     0.24   0.808    -.1260613    .1615324
+                           Ogden  |  -.1165628   .0162995    -7.15   0.000    -.1487452   -.0843804
+                   Oklahoma City  |  -.0898761   .0345847    -2.60   0.010    -.1581617   -.0215904
+                           Omaha  |   -.034464   .0196104    -1.76   0.081    -.0731837    .0042557
+                         Oshkosh  |   .0054734   .0098438     0.56   0.579    -.0139626    .0249094
+       Pawtucket & Central Falls  |  -.0216668   .0241139    -0.90   0.370    -.0692785    .0259449
+                          Peoria  |  -.0076155   .0204722    -0.37   0.710    -.0480368    .0328057
+                    Philadelphia  |  -.0187205   .0433742    -0.43   0.667    -.1043605    .0669195
+                         Phoenix  |  -.0211545   .0399737    -0.53   0.597    -.1000804    .0577714
+                      Pittsburgh  |   .0142819   .0242652     0.59   0.557    -.0336284    .0621921
+                         Pontiac  |   -.009525   .0293969    -0.32   0.746    -.0675677    .0485177
+                     Port Arthur  |  -.0986173   .0425425    -2.32   0.022    -.1826152   -.0146194
+                        Portland  |   .1127585   .0397016     2.84   0.005       .03437    .1911471
+                    Poughkeepsie  |  -.0718935   .0428847    -1.68   0.096    -.1565671      .01278
+                      Providence  |  -.0403247   .0465094    -0.87   0.387    -.1321549    .0515056
+                          Pueblo  |  -.0492668   .0213069    -2.31   0.022    -.0913361   -.0071974
+                          Queens  |  -.0953482   .0692657    -1.38   0.171    -.2321095    .0414132
+                          Quincy  |  -.0138854   .0355519    -0.39   0.697    -.0840807    .0563099
+                          Racine  |  -.0269405    .005569    -4.84   0.000    -.0379362   -.0159449
+                          Revere  |  -.0274704   .0363263    -0.76   0.451    -.0991947    .0442539
+                        Richmond  |  -.0783552   .0375793    -2.09   0.039    -.1525535   -.0041568
+                       Rochester  |  -.0245274   .0326415    -0.75   0.453    -.0889763    .0399215
+                        Rockford  |  -.0536876   .0140667    -3.82   0.000    -.0814614   -.0259137
+                      Sacramento  |  -.0039396   .0472718    -0.08   0.934    -.0972751     .089396
+                         Saginaw  |  -.0224818   .0168043    -1.34   0.183     -.055661    .0106974
+                  Salt Lake City  |   .0332489   .0286243     1.16   0.247    -.0232683    .0897661
+                     San Antonio  |  -.0050119    .041523    -0.12   0.904    -.0869968     .076973
+                       San Diego  |  -.0672319   .0589459    -1.14   0.256    -.1836174    .0491535
+                   San Francisco  |   -.000797   .0829526    -0.01   0.992    -.1645824    .1629885
+                        San Jose  |  -.0353818   .0671021    -0.53   0.599    -.1678713    .0971076
+                        Savannah  |   .0050588   .0273378     0.19   0.853    -.0489182    .0590358
+                     Schenectady  |  -.0825843   .0087408    -9.45   0.000    -.0998426   -.0653261
+                         Seattle  |    .066573    .055681     1.20   0.234    -.0433661    .1765121
+                      Shreveport  |  -.1904595   .0533667    -3.57   0.000    -.2958292   -.0850898
+                      Sioux City  |  -.1439433   .0127852   -11.26   0.000     -.169187   -.1186996
+                      Somerville  |   .0693982   .0466731     1.49   0.139    -.0227552    .1615516
+                      South Bend  |  -.0022927   .0128814    -0.18   0.859    -.0277263    .0231409
+                         Spokane  |  -.0429977   .0077563    -5.54   0.000    -.0583122   -.0276833
+                     Springfield  |  -.0328698   .0080659    -4.08   0.000    -.0487954   -.0169441
+                      St. Joseph  |  -.0439797   .0120973    -3.64   0.000    -.0678652   -.0200941
+                       St. Louis  |  -.0260135   .0382781    -0.68   0.498    -.1015915    .0495644
+                        St. Paul  |   .0529954   .0300825     1.76   0.080    -.0064008    .1123917
+                  St. Petersburg  |  -.0522897   .0319136    -1.64   0.103    -.1153013    .0107219
+Stamford, Darien, and New Canaan  |  -.1649648   .0645576    -2.56   0.012    -.2924302   -.0374994
+                   Staten Island  |  -.2034943   .0427984    -4.75   0.000    -.2879975    -.118991
+                        Stockton  |  -.0829809   .0485591    -1.71   0.089    -.1788582    .0128964
+                        Syracuse  |  -.0094991   .0125749    -0.76   0.451    -.0343276    .0153294
+                          Tacoma  |  -.0042758    .028727    -0.15   0.882    -.0609958    .0524441
+                           Tampa  |  -.1249319   .0452151    -2.76   0.006    -.2142067   -.0356571
+                     Terre Haute  |  -.0735657   .0047083   -15.62   0.000    -.0828619   -.0642694
+                          Toledo  |  -.0138228   .0149929    -0.92   0.358    -.0434255    .0157799
+                          Topeka  |  -.0333894    .012114    -2.76   0.007    -.0573077   -.0094711
+                         Trenton  |  -.0793308   .0543162    -1.46   0.146    -.1865751    .0279135
+                           Tulsa  |   -.087556   .0351732    -2.49   0.014    -.1570036   -.0181083
+                       Union Co.  |   -.135419   .0633727    -2.14   0.034     -.260545   -.0102931
+                           Utica  |  -.0562648   .0094297    -5.97   0.000    -.0748832   -.0376465
+                            Waco  |  -.1250024   .0310047    -4.03   0.000    -.1862195   -.0637852
+                          Warren  |    .047507   .0203394     2.34   0.021      .007348    .0876659
+                       Waterbury  |  -.1240308    .038902    -3.19   0.002    -.2008406    -.047221
+                        Waterloo  |  -.0024353   .0076968    -0.32   0.752    -.0176322    .0127616
+                       Watertown  |  -.0230279   .0424142    -0.54   0.588    -.1067724    .0607167
+                         Wichita  |  -.1061371   .0276736    -3.84   0.000     -.160777   -.0514972
+                    Wilkes-Barre  |  -.0749768    .007786    -9.63   0.000    -.0903498   -.0596038
+                   Winston-Salem  |   -.033912    .037059    -0.92   0.361     -.107083     .039259
+                      Woonsocket  |  -.0969635   .0049848   -19.45   0.000    -.1068056   -.0871213
+                            York  |   -.058157   .0332603    -1.75   0.082    -.1238276    .0075136
+                      Youngstown  |  -.0125573   .0161645    -0.78   0.438    -.0444733    .0193587
+                                  |
+                            _cons |   1.000337   .0424534    23.56   0.000     .9165148    1.084159
+---------------------------------------------------------------------------------------------------
+
+. estadd local city_controls "Yes": reg_base_c_d reg_base_cube reg_all*;
+
+.  #delimit cr
+delimiter now cr
+. 
+. * Export regressions
+. 
+. regress tract_dvoteshare perc_tract_d perc_tract_c 
+
+      Source |       SS           df       MS      Number of obs   =    16,352
+-------------+----------------------------------   F(2, 16349)     =    869.26
+       Model |  41.9851664         2  20.9925832   Prob > F        =    0.0000
+    Residual |  394.829431    16,349  .024150066   R-squared       =    0.0961
+-------------+----------------------------------   Adj R-squared   =    0.0960
+       Total |  436.814597    16,351  .026714855   Root MSE        =     .1554
+
+------------------------------------------------------------------------------
+tract_dvot~e | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+perc_tract_d |   .1628046   .0041351    39.37   0.000     .1546993    .1709098
+perc_tract_c |   .0929682   .0036698    25.33   0.000     .0857749    .1001614
+       _cons |   .6847171   .0019024   359.92   0.000     .6809882    .6884461
+------------------------------------------------------------------------------
+
+. #delimit ;
+delimiter now ;
+. esttab reg_* using "$OUTPUT_PATH/main_regressions.tex", 
+>         se star(* 0.10 **       0.05 *** 0.01) ar2 replace booktabs label
+>         drop(*.city2)
+>         stats(city_controls N r2_a, label("City fixed effects" "Observations" "Adjusted R$^2$"));
+(output written to C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/main_regressions.tex)
+
+.         #delimit cr
+delimiter now cr
+. 
+. log close
+      name:  <unnamed>
+       log:  C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/regression_analysis_log.log
+  log type:  text
+ closed on:  25 Mar 2023, 16:15:11
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
