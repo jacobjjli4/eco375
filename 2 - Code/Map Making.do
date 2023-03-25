@@ -55,5 +55,6 @@ shp2dta using s_22mr22, database(s_22mr22) ///
 
 use "s_22mr22.dta", clear
 spmap using s_22mr22_coord.dta if id <56 & id!=1 & id!=13 & id!=4 &id!=39 & id!=54 & id!=46, id(id) fcolor(gs14) ocolor(gs5) point(data(HOLC_cities_lat_lon.dta) xcoord(lng) ycoord(lat) ocolor(navy) fcolor(ltblue) osize(medium))
+graph export "$OUTPUT_PATH\HOLC_cities.png", as(png) replace
 
 log close
