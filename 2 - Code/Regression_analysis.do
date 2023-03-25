@@ -92,41 +92,51 @@ regress tract_dvoteshare perc_tract_d _yr_median perc_pop_white perc_pop_black /
 perc_pop_asian if tract_holc_share > 0.9, robust
 
 * Regression with selected covariates and city fixed effects
+drop perc_tract_c_plus_d
+
 encode city, generate(city2)
 gen perc_tract_d_sq = perc_tract_d^2
 gen perc_tract_d_cu = perc_tract_d^3
 label variable perc_tract_d_sq "Grade D squared"
 label variable perc_tract_d_cu "Grade D cubed"
 
+gen perc_tract_c_sq = perc_tract_c^2
+gen perc_tract_c_cu = perc_tract_c^3
+label variable perc_tract_c_sq "Grade C squared"
+label variable perc_tract_c_cu "Grade C cubed"
+
+global indep_vars perc_tract_d* perc_tract_c*
+
 #delimit ;
-eststo reg_base_cube: regress tract_dvoteshare perc_tract_d perc_tract_d_sq 
-perc_tract_d_cu i.city2 if tract_holc_share > 0.9, cluster(city2);
+eststo reg_base_c_d: regress tract_dvoteshare perc_tract_d perc_tract_c
+i.city2 if tract_holc_share > 0.9, cluster(city2);
 
-eststo reg_no_educ: regress tract_dvoteshare perc_tract_d perc_tract_d_sq 
-perc_tract_d_cu _yr_median perc_pop_white-perc_pop_asian median_age i.city2 
+eststo reg_base_cube: regress tract_dvoteshare $indep_vars i.city2 
 if tract_holc_share > 0.9, cluster(city2);
 
-eststo reg_no_race: regress tract_dvoteshare perc_tract_d perc_tract_d_sq 
-perc_tract_d_cu _yr_median perc_hs_total-perc_bach_total median_age i.city2 
+eststo reg_all_cov_lin: regress tract_dvoteshare perc_tract_d perc_tract_c 
+_yr_median perc_hs_total-perc_pop_asian median_age i.city2 
 if tract_holc_share > 0.9, cluster(city2);
 
-eststo reg_all_cov: regress tract_dvoteshare perc_tract_d perc_tract_d_sq 
+eststo reg_all_cov: regress tract_dvoteshare $indep_vars _yr_median 
+perc_hs_total-perc_pop_asian median_age i.city2 
+if tract_holc_share > 0.9, cluster(city2);
+
+eststo reg_all_cov_no_c: regress tract_dvoteshare perc_tract_d perc_tract_d_sq 
 perc_tract_d_cu _yr_median perc_hs_total-perc_pop_asian median_age i.city2 
 if tract_holc_share > 0.9, cluster(city2);
 
-eststo reg_all_cov_lin: regress tract_dvoteshare perc_tract_d _yr_median perc_hs_total-perc_pop_asian median_age i.city2 
-if tract_holc_share > 0.9, cluster(city2);
-
-estadd local city_controls "Yes": reg_base_cube reg_no_educ reg_no_race 
-	reg_all_cov reg_all_cov_lin; 
+estadd local city_controls "Yes": reg_base_c_d reg_base_cube reg_all*; 
 #delimit cr
 
 * Export regressions
+
+regress tract_dvoteshare perc_tract_d perc_tract_c 
 #delimit ;
 esttab reg_* using "$OUTPUT_PATH/main_regressions.tex", 
 	se star(* 0.10 ** 	0.05 *** 0.01) ar2 replace booktabs label
 	drop(*.city2)
 	stats(city_controls N r2_a, label("City fixed effects" "Observations" "Adjusted R$^2$"));
-#delimit cr
+	#delimit cr
 
 log close
