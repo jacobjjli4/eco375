@@ -69,6 +69,7 @@ eststo reg_baseline: regress tract_dvoteshare perc_tract_d if incl == 1, robust
 esttab reg_baseline using "$OUTPUT_PATH/base_regression.tex", ///
 se star(* 0.10 ** 	0.05 *** 0.01) replace booktabs label
 estadd local city_controls "No"
+estadd local cluster_se "No"
 
 
 * Robustness check -- does changing the tract_holc_share cutoff affect results?
@@ -113,33 +114,52 @@ global indep_vars perc_tract_d* perc_tract_c*
 #delimit ;
 eststo reg_base_c_d: regress tract_dvoteshare perc_tract_d perc_tract_c
 i.city2 if incl == 1, cluster(city2);
+testparm i.city2;
+scalar f_p_value = r(F);
+estadd scalar f_p_value = r(F);
 
 eststo reg_base_cube: regress tract_dvoteshare $indep_vars i.city2 
 if incl == 1, cluster(city2);
+testparm i.city2;
+scalar f_p_value = r(F);
+estadd scalar f_p_value = r(F);
 
 eststo reg_all_cov_lin: regress tract_dvoteshare perc_tract_d perc_tract_c 
 _yr_median perc_hs_total-perc_pop_asian median_age i.city2 
 if incl == 1, cluster(city2);
+testparm i.city2;
+scalar f_p_value = r(F);
+estadd scalar f_p_value = r(F);
 
 eststo reg_all_cov: regress tract_dvoteshare $indep_vars _yr_median 
 perc_hs_total-perc_pop_asian median_age i.city2 
 if incl == 1, cluster(city2);
+testparm i.city2;
+scalar f_p_value = r(F);
+estadd scalar f_p_value = r(F);
 
 eststo reg_all_cov_no_c: regress tract_dvoteshare perc_tract_d perc_tract_d_sq 
 perc_tract_d_cu _yr_median perc_hs_total-perc_pop_asian median_age i.city2 
 if incl == 1, cluster(city2);
+testparm i.city2;
+scalar f_p_value = r(F);
+estadd scalar f_p_value = r(F);
+scalar clust = e(N_clust);
 
 estadd local city_controls "Yes": reg_base_c_d reg_base_cube reg_all*; 
+estadd local cluster_se "City": reg_base_c_d reg_base_cube reg_all*;
+estadd scalar clust: reg_base_c_d reg_base_cube reg_all*;
 #delimit cr
 
 * Export regressions
 
-regress tract_dvoteshare perc_tract_d perc_tract_c 
 #delimit ;
 esttab reg_* using "$OUTPUT_PATH/main_regressions.tex", 
 	se star(* 0.10 ** 	0.05 *** 0.01) ar2 replace booktabs label
 	drop(*.city2)
-	stats(city_controls N r2_a, label("City fixed effects" "Observations" "Adjusted R$^2$"));
-	#delimit cr
+	stats(city_controls cluster_se clust f_p_value N r2_a, label("City fixed effects"
+	"Clustered SE" "Clusters" "F-stat on city fixed effects" "Observations" 
+	"Adjusted R$^2$"));
+#delimit cr
 
 log close
