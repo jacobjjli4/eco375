@@ -110,6 +110,7 @@ label variable perc_tract_c_sq "Grade C squared"
 label variable perc_tract_c_cu "Grade C cubed"
 
 global indep_vars perc_tract_d* perc_tract_c*
+global controls _yr_median-male_female_ratio perc_hs_total-perc_pop_asian
 
 #delimit ;
 eststo reg_base_c_d: regress tract_dvoteshare perc_tract_d perc_tract_c
@@ -125,21 +126,21 @@ scalar f_p_value = r(F);
 estadd scalar f_p_value = r(F);
 
 eststo reg_all_cov_lin: regress tract_dvoteshare perc_tract_d perc_tract_c 
-_yr_median perc_hs_total-perc_pop_asian median_age i.city2 
+$controls i.city2 
 if incl == 1, cluster(city2);
 testparm i.city2;
 scalar f_p_value = r(F);
 estadd scalar f_p_value = r(F);
 
-eststo reg_all_cov: regress tract_dvoteshare $indep_vars _yr_median 
-perc_hs_total-perc_pop_asian median_age i.city2 
+eststo reg_all_cov: regress tract_dvoteshare $indep_vars 
+$controls i.city2 
 if incl == 1, cluster(city2);
 testparm i.city2;
 scalar f_p_value = r(F);
 estadd scalar f_p_value = r(F);
 
 eststo reg_all_cov_no_c: regress tract_dvoteshare perc_tract_d perc_tract_d_sq 
-perc_tract_d_cu _yr_median perc_hs_total-perc_pop_asian median_age i.city2 
+perc_tract_d_cu $controls i.city2 
 if incl == 1, cluster(city2);
 testparm i.city2;
 scalar f_p_value = r(F);
