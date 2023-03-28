@@ -31,6 +31,7 @@ cd "$INPUT_PATH/Merge"
 use "HOLC_Voting_Covariates.dta", clear
 drop _merge
 replace _yr_median = _yr_median / 1000
+replace male_female_ratio = male_female_ratio / 100
 
 
 * label dataset
@@ -60,7 +61,7 @@ twoway(scatter tract_dvoteshare perc_tract_d if incl == 1, msize(0.8))
 graph export "$OUTPUT_PATH\baseline_scatter.png", as(png) replace
 
 * Generate summary statistics
-eststo sum_stat: estpost sum perc_tract_a-perc_tract_d tract_dvoteshare median_age male_female_ratio perc_less_hs_total-perc_pop_asian if incl == 1
+eststo sum_stat: estpost sum perc_tract_a-perc_tract_d tract_dvoteshare _yr_median median_age male_female_ratio perc_less_hs_total-perc_pop_asian if incl == 1
 esttab sum_stat using "$OUTPUT_PATH\sum_stat.tex", cells("count(fmt(%8.0f)) mean(fmt(%8.3g)) sd(fmt(%8.3g)) min(fmt(%8.3g)) max(fmt(%8.3g))") /// 
 label nodepvar nonumbers nomtitles booktabs replace
 
