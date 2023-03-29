@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/regression_analysis_log.log
   log type:  text
- opened on:  28 Mar 2023, 11:44:45
+ opened on:  28 Mar 2023, 19:30:33
 
 . 
 . cd "$INPUT_PATH/Merge"
@@ -1028,6 +1028,7 @@ Stamford, Darien, and New Canaan  |   .0554071   .0043742    12.67   0.000     .
        Constraint 107 dropped
        Constraint 108 dropped
        Constraint 109 dropped
+       Constraint 110 dropped
        Constraint 111 dropped
        Constraint 112 dropped
        Constraint 113 dropped
@@ -1078,13 +1079,12 @@ Stamford, Darien, and New Canaan  |   .0554071   .0043742    12.67   0.000     .
        Constraint 158 dropped
        Constraint 159 dropped
        Constraint 160 dropped
-       Constraint 161 dropped
        Constraint 162 dropped
        Constraint 163 dropped
        Constraint 164 dropped
        Constraint 165 dropped
 
-       F(  2,   165) =  237.25
+       F(  2,   165) =  270.15
             Prob > F =    0.0000
 
 . scalar f_p_value = r(F);
@@ -1092,7 +1092,7 @@ Stamford, Darien, and New Canaan  |   .0554071   .0043742    12.67   0.000     .
 . estadd scalar f_p_value = r(F);
 
 added scalar:
-          e(f_p_value) =  237.24758
+          e(f_p_value) =  270.15055
 
 . eststo reg_base_cube: regress tract_dvoteshare $indep_vars i.city2 
 > if incl == 1, cluster(city2);
@@ -3239,5 +3239,5 @@ delimiter now cr
       name:  <unnamed>
        log:  C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/regression_analysis_log.log
   log type:  text
- closed on:  28 Mar 2023, 11:44:53
+ closed on:  28 Mar 2023, 19:30:43
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

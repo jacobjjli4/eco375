@@ -3,18 +3,27 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{eco_375_paper}
 
-\RequirePackage[letterpaper, margin=0.75in]{geometry}
+\RequirePackage[letterpaper, margin=1in]{geometry}
 \RequirePackage{booktabs} % for tables
 \RequirePackage{graphicx} % for graphics
 \RequirePackage{sectsty} % Specify section formatting
 \RequirePackage{tgadventor} % sans-serif font for headings
 \RequirePackage{charter} % serif font for body text
 \RequirePackage{longtable}
-\RequirePackage{amsmath}
+\RequirePackage{amsmath} % for equations
 \RequirePackage{lscape}
 
+% citations
+\usepackage[backend=biber,
+			style=apa,
+			sorting=nyt]{biblatex}
+\nocite{*} % use entire reference list
+
+% paragraph formatting
 \RequirePackage{setspace}
 \doublespacing
+\setlength{\parindent}{20pt}
+\usepackage{indentfirst}
 	
 \sectionfont{\sffamily}
 \subsectionfont{\sffamily}
@@ -27,14 +36,14 @@
 % Path for Ben
 %\newcommand{\opath}{}
 
-\newcommand{\datatable}[3]{ % for regression output
+\newcommand{\datatable}[4][normalsize]{ % for regression output
 	\begin{table}[h]
-	\begin{normalsize}
+	\begin{#1}
 	\centering
-	\input{\opath/#1}
-	\label{#2}
-	\caption{#3}
-	\end{normalsize}
+	\input{\opath/#2}
+	\label{#3}
+	\caption{#4}
+	\end{#1}
 	\end{table}
 }
 
