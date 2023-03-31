@@ -55,18 +55,20 @@ label variable perc_pop_asian "Asian share"
 
 * Generate variable that indicates if a tract has sufficient data for analysis
 gen incl = 0
-replace incl = 1 if tract_dem_total != . & pop_white != . & _yr_median != . & median_age != . & male_female_ratio != . & perc_less_hs_total != . & tract_holc_share > 0.9
+replace incl = 1 if tract_dem_total != . & pop_white != . & _yr_median != . & median_age != . & male_female_ratio != . & perc_less_hs_total != . & tract_holc_share > 0.9 & tract_holc_share < 1.05
 
 * Scatter plot
 twoway(scatter tract_dvoteshare perc_tract_d if incl == 1, msize(0.8))
-graph export "$OUTPUT_PATH\baseline_scatter.png", as(png) replace
+graph export "$OUTPUT_PATH\dshare_scatter.png", as(png) replace
+twoway(scatter tract_dvoteshare perc_tract_c if incl == 1, msize(0.8))
+graph export "$OUTPUT_PATH\cshare_scatter.png", as(png) replace
 
 * Generate summary statistics
 eststo sum_stat: estpost sum perc_tract_a-perc_tract_d tract_dvoteshare _yr_median median_age male_female_ratio perc_less_hs_total-perc_pop_asian if incl == 1
 eststo sum_stat_not: estpost sum tract_dvoteshare _yr_median median_age male_female_ratio perc_less_hs_total-perc_pop_asian if incl == 0
 
 esttab sum_stat sum_stat_not using "$OUTPUT_PATH\sum_stat.tex", ///
-cells("count(pattern(1 1) fmt(%8.0f)) mean(fmt(%8.3g) pattern(1 1)) sd(fmt(%8.3g) pattern(1 1)) min(fmt(%8.3g) pattern(1 1)) max(fmt(%8.3g) pattern(1 1))") /// 
+cells("count(pattern(1 1) fmt(%8.0f)) mean(fmt(%8.2g) pattern(1 1)) sd(fmt(%8.2g) pattern(1 1)) min(fmt(%8.2g) pattern(1 1)) max(fmt(%8.2g) pattern(1 1))") /// 
 label mtitles("Census tracts in study" "Census tracts not in study") nodepvar nonumbers booktabs replace
 * Regression
 eststo reg_baseline: regress tract_dvoteshare perc_tract_d if incl == 1, robust
@@ -100,20 +102,18 @@ regress tract_dvoteshare perc_tract_d _yr_median perc_pop_white perc_pop_black /
 perc_pop_asian if incl == 1, robust
 
 * Regression with selected covariates and city fixed effects
-drop perc_tract_c_plus_d
-
 encode city, generate(city2)
-gen perc_tract_d_sq = perc_tract_d^2
-gen perc_tract_d_cu = perc_tract_d^3
+gen perc_tract_d_sq = c.perc_tract_d#c.perc_tract_d
+gen perc_tract_d_cu = c.perc_tract_d#c.perc_tract_d#c.perc_tract_d
 label variable perc_tract_d_sq "Grade D squared"
 label variable perc_tract_d_cu "Grade D cubed"
 
-gen perc_tract_c_sq = perc_tract_c^2
-gen perc_tract_c_cu = perc_tract_c^3
+gen perc_tract_c_sq = c.perc_tract_c#c.perc_tract_c
+gen perc_tract_c_cu = c.perc_tract_c#c.perc_tract_c#c.perc_tract_c
 label variable perc_tract_c_sq "Grade C squared"
 label variable perc_tract_c_cu "Grade C cubed"
 
-global indep_vars perc_tract_d* perc_tract_c*
+global indep_vars c.perc_tract_d perc_tract_d_sq perc_tract_d_cu perc_tract_c* perc_tract_c_sq perc_tract_c_cu
 global controls _yr_median-male_female_ratio perc_hs_total-perc_pop_asian
 
 #delimit ;
@@ -166,5 +166,9 @@ esttab reg_* using "$OUTPUT_PATH/main_regressions.tex",
 	"Clustered SE" "Clusters" "F-stat on city fixed effects" "Observations" 
 	"Adjusted R$^2$"));
 #delimit cr
+
+regress tract_dvoteshare c.perc_tract_d c.perc_tract_d#c.perc_tract_d i.city2 if incl == 1, cluster(city2)
+margins, at(perc_tract_d=(0(0.01)1)) noci
+marginsplot, recast(line)  
 
 log close
