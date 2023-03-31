@@ -1,0 +1,150 @@
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/merge_covariates_log.log
+  log type:  text
+ opened on:  31 Mar 2023, 10:32:05
+
+. 
+. 
+. * Prepare race data for merge
+. cd "$INPUT_PATH/Covariates"
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 ECO375\ECO375 Project\1 - Data\Covariates
+
+. import excel "Census Tract Population Data (2020).xlsx", firstrow clear
+(5 vars, 85,395 obs)
+
+. gen tract_code = substr(GEO_ID, 10, 13)
+
+. 
+. save "cleaned_Census Tract Population Data (2020)", replace
+file cleaned_Census Tract Population Data (2020).dta saved
+
+. 
+. * Prepare income data for merge
+. import excel "Tract Level Income Data (2020).xlsx", firstrow clear
+(2 vars, 85,395 obs)
+
+. gen tract_code = substr(GEO_ID, 10, 13)
+
+. 
+. save "cleaned_Tract Level Income Data (2020)", replace
+file cleaned_Tract Level Income Data (2020).dta saved
+
+. 
+. * Prepare age and sex data for merge
+. import excel "Age and Sex Data.xlsx", firstrow clear
+(16 vars, 85,395 obs)
+
+. gen tract_code = substr(GEO_ID, 10, 13)
+
+. drop GEO_ID NAME-age_over_65
+
+. drop if median_age == "-"
+(911 observations deleted)
+
+. drop if male_female_ratio == "-"
+(74 observations deleted)
+
+. destring male_female_ratio median_age, replace
+male_female_ratio: all characters numeric; replaced as double
+median_age: all characters numeric; replaced as double
+
+. 
+. save "cleaned_Age and Sex Data", replace
+file cleaned_Age and Sex Data.dta saved
+
+. 
+. * Prepare education data for merge
+. import excel "Cleaned Education Data.xlsx", firstrow clear
+(21 vars, 85,395 obs)
+
+. * generate education proportion data
+. foreach var of varlist less_hs_total-bach_total {
+  2.         gen perc_`var' = `var' / pop_total
+  3. }
+(874 missing values generated)
+(874 missing values generated)
+(874 missing values generated)
+(874 missing values generated)
+
+. gen tract_code = substr(GEO_ID, 10, 13)
+
+. drop GEO_ID-pop_total
+
+. 
+. save "cleaned_Education Data", replace
+file cleaned_Education Data.dta saved
+
+. 
+. * MERGE covariates
+. cd "$INPUT_PATH/Merge"
+C:\Users\lijia\OneDrive - University of Toronto\Documents\School\1-5 ECO375\ECO375 Project\1 - Data\Merge
+
+. use "HOLC_Voting_Merged.dta", clear
+
+. 
+. foreach file in "cleaned_Census Tract Population Data (2020).dta" "cleaned_Tract Level Income Data (2020)" "cleaned_Age and Sex Data" "cleaned_Education Data
+> " {
+  2.         capture drop _merge
+  3.         merge 1:1 tract_code using "$INPUT_PATH/Covariates/`file'"
+  4.         drop if _merge == 2
+  5. }
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         2,845
+        from master                         0  (_merge==1)
+        from using                      2,845  (_merge==2)
+
+    Matched                            82,550  (_merge==3)
+    -----------------------------------------
+(2,845 observations deleted)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         2,845
+        from master                         0  (_merge==1)
+        from using                      2,845  (_merge==2)
+
+    Matched                            82,550  (_merge==3)
+    -----------------------------------------
+(2,845 observations deleted)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         3,700
+        from master                       920  (_merge==1)
+        from using                      2,780  (_merge==2)
+
+    Matched                            81,630  (_merge==3)
+    -----------------------------------------
+(2,780 observations deleted)
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                         2,845
+        from master                         0  (_merge==1)
+        from using                      2,845  (_merge==2)
+
+    Matched                            82,550  (_merge==3)
+    -----------------------------------------
+(2,845 observations deleted)
+
+. 
+. * generate race proportion data
+. foreach var of varlist pop_white pop_black pop_asian {
+  2.         gen perc_`var' = `var' / pop_total
+  3. }
+(583 missing values generated)
+(583 missing values generated)
+(583 missing values generated)
+
+. 
+. save "$INPUT_PATH/Merge/HOLC_Voting_Covariates.dta", replace
+file C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//1 - Data/Merge/HOLC_Voting_Covariates.dta saved
+
+. 
+. 
+end of do-file
+
+. exit, clear

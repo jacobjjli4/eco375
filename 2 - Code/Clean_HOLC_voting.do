@@ -96,7 +96,7 @@ rename MAX_city city
 
 * remove census tracts that are not matched with HOLC tracts
 egen tract_holc_share = rowtotal(perc_tract_*)
-drop if tract_holc_share == 0
-drop if tract_holc_share > 1.05
+// drop if tract_holc_share == 0
+// drop if tract_holc_share > 1.05
 
 save "$INPUT_PATH/Merge/HOLC_Voting_Merged.dta", replace

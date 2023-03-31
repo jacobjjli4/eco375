@@ -54,7 +54,8 @@ label variable perc_pop_black "Black share"
 label variable perc_pop_asian "Asian share"
 
 * Generate variable that indicates if a tract has sufficient data for analysis
-gen incl = 1 if tract_dem_total != . & pop_white != . & _yr_median != . & median_age != . & male_female_ratio != . & perc_less_hs_total != . & tract_holc_share > 0.9
+gen incl = 0
+replace incl = 1 if tract_dem_total != . & pop_white != . & _yr_median != . & median_age != . & male_female_ratio != . & perc_less_hs_total != . & tract_holc_share > 0.9
 
 * Scatter plot
 twoway(scatter tract_dvoteshare perc_tract_d if incl == 1, msize(0.8))
@@ -62,9 +63,11 @@ graph export "$OUTPUT_PATH\baseline_scatter.png", as(png) replace
 
 * Generate summary statistics
 eststo sum_stat: estpost sum perc_tract_a-perc_tract_d tract_dvoteshare _yr_median median_age male_female_ratio perc_less_hs_total-perc_pop_asian if incl == 1
-esttab sum_stat using "$OUTPUT_PATH\sum_stat.tex", cells("count(fmt(%8.0f)) mean(fmt(%8.3g)) sd(fmt(%8.3g)) min(fmt(%8.3g)) max(fmt(%8.3g))") /// 
-label nodepvar nonumbers nomtitles booktabs replace
+eststo sum_stat_not: estpost sum tract_dvoteshare _yr_median median_age male_female_ratio perc_less_hs_total-perc_pop_asian if incl == 0
 
+esttab sum_stat sum_stat_not using "$OUTPUT_PATH\sum_stat.tex", ///
+cells("count(pattern(1 1) fmt(%8.0f)) mean(fmt(%8.3g) pattern(1 1)) sd(fmt(%8.3g) pattern(1 1)) min(fmt(%8.3g) pattern(1 1)) max(fmt(%8.3g) pattern(1 1))") /// 
+label mtitles("Census tracts in study" "Census tracts not in study") nodepvar nonumbers booktabs replace
 * Regression
 eststo reg_baseline: regress tract_dvoteshare perc_tract_d if incl == 1, robust
 esttab reg_baseline using "$OUTPUT_PATH/base_regression.tex", ///

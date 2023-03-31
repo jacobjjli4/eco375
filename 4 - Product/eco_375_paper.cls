@@ -21,7 +21,7 @@
 
 % paragraph formatting
 \RequirePackage{setspace}
-\doublespacing
+\onehalfspacing
 \setlength{\parindent}{20pt}
 \usepackage{indentfirst}
 	
