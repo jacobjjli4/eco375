@@ -6,12 +6,13 @@
 \RequirePackage[letterpaper, margin=1in]{geometry}
 \RequirePackage{booktabs} % for tables
 \RequirePackage{graphicx} % for graphics
-\RequirePackage{sectsty} % Specify section formatting
 \RequirePackage{tgadventor} % sans-serif font for headings
-\RequirePackage{charter} % serif font for body text
+\RequirePackage{times} % serif font for body text
 \RequirePackage{longtable}
 \RequirePackage{amsmath} % for equations
 \RequirePackage{lscape}
+\RequirePackage{caption}
+\RequirePackage{subcaption} % for side-by-side figures
 
 % citations
 \usepackage[backend=biber,
@@ -25,9 +26,9 @@
 \setlength{\parindent}{20pt}
 \usepackage{indentfirst}
 	
-\sectionfont{\sffamily}
-\subsectionfont{\sffamily}
-\subsubsectionfont{\sffamily}
+\RequirePackage{titlesec}
+\titleformat*{\section}{\Large\sffamily}
+\titlespacing\section{0pt}{6pt plus 4pt minus 2pt}{6pt plus 2pt minus 2pt}
 
 \graphicspath{{\opath/}}	
 
@@ -41,35 +42,10 @@
 	\begin{#1}
 	\centering
 	\input{\opath/#2}
-	\label{#3}
+	\label{table:#3}
 	\caption{#4}
 	\end{#1}
 	\end{table}
-}
-
-\newcommand{\datatableii}[4]{ % for regression output that needs 2 tables
-	\begin{small}
-	\begin{table}[h]
-	\centering
-	\input{\opath/#1}
-	\input{\opath/#2}
-	\label{#3}
-	\caption{#4}
-	\end{table}
-	\end{small}
-}
-
-\newcommand{\datatableiii}[5]{ % for regression output that needs 3 tables
-	\begin{small}
-	\begin{table}[h]
-	\centering
-	\input{\opath/#1}
-	\input{\opath/#2}
-	\input{\opath/#3}
-	\label{#4}
-	\caption{#5}
-	\end{table}
-	\end{small}
 }
 
 \newcommand{\newfigure}[4][0.8]{
@@ -77,23 +53,22 @@
 	\centering
 	\includegraphics[width=#1\linewidth]{#2}
 	\caption{#4}
-	\label{#3}
+	\label{fig:#3}
 	\end{figure}
 }
 
-\newcommand{\imagedatatable}[2]{
-	\begin{table}[h!]
-	\centering
-	\includegraphics[width=0.8\linewidth]{#1}
-	\caption{#2}
-	\end{table}
-}
-\newcommand{\imagedatatableiii}[4]{
-	\begin{table}[h!]
-	\centering
-	\includegraphics[width=0.9\linewidth]{#1}
-	\includegraphics[width=0.9\linewidth]{#2}
-	\includegraphics[width=0.9\linewidth]{#3}
-	\caption{#4}
-	\end{table}
+\newcommand{\newsubfig}[5][1]{
+	\begin{figure}[h]
+		\centering
+		\begin{subfigure}{0.5\linewidth}
+		  \centering
+		  \includegraphics[width=#1\linewidth]{#2}
+		\end{subfigure}%
+		\begin{subfigure}{0.5\linewidth}
+		  \centering
+		  \includegraphics[width=#1\linewidth]{#3}
+		\end{subfigure}
+		\caption{#4}
+		\label{fig:#5}
+	\end{figure}
 }

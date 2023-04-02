@@ -113,7 +113,8 @@ gen perc_tract_c_cu = c.perc_tract_c#c.perc_tract_c#c.perc_tract_c
 label variable perc_tract_c_sq "Grade C squared"
 label variable perc_tract_c_cu "Grade C cubed"
 
-global indep_vars c.perc_tract_d perc_tract_d_sq perc_tract_d_cu perc_tract_c* perc_tract_c_sq perc_tract_c_cu
+global indep_vars perc_tract_d* perc_tract_c*
+
 global controls _yr_median-male_female_ratio perc_hs_total-perc_pop_asian
 
 #delimit ;
@@ -167,8 +168,18 @@ esttab reg_* using "$OUTPUT_PATH/main_regressions.tex",
 	"Adjusted R$^2$"));
 #delimit cr
 
-regress tract_dvoteshare c.perc_tract_d c.perc_tract_d#c.perc_tract_d i.city2 if incl == 1, cluster(city2)
-margins, at(perc_tract_d=(0(0.01)1)) noci
-marginsplot, recast(line)  
+* Create plots of marginal effects
+global indep_vars c.perc_tract_d c.perc_tract_d#c.perc_tract_d c.perc_tract_d#c.perc_tract_d#c.perc_tract_d ///
+c.perc_tract_c c.perc_tract_c#c.perc_tract_c c.perc_tract_c#c.perc_tract_c#c.perc_tract_c
+
+regress tract_dvoteshare $indep_vars $controls ///
+i.city2 if incl == 1, cluster(city2)
+margins, at(perc_tract_d=(0(0.01)1))
+marginsplot, recast(line) recastci(rarea) ytitle(Predicted Dem share)
+graph export "$OUTPUT_PATH\dshare_marginplot.png", as(png) replace
+
+margins, at(perc_tract_c=(0(0.01)1))
+marginsplot, recast(line) recastci(rarea) ytitle(Predicted value of Dem share)
+graph export "$OUTPUT_PATH\cshare_marginplot.png", as(png) replace
 
 log close
