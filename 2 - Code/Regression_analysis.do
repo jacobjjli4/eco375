@@ -122,36 +122,22 @@ global controls _yr_median-male_female_ratio perc_hs_total-perc_pop_asian
 #delimit ;
 eststo reg_base_c_d: regress tract_dvoteshare perc_tract_d perc_tract_c
 i.city2 if incl == 1, cluster(city2);
-testparm i.city2;
-scalar f_p_value = r(F);
-estadd scalar f_p_value = r(F);
 
 eststo reg_base_cube: regress tract_dvoteshare $indep_vars i.city2 
 if incl == 1, cluster(city2);
-testparm i.city2;
-scalar f_p_value = r(F);
-estadd scalar f_p_value = r(F);
 
 eststo reg_all_cov_lin: regress tract_dvoteshare perc_tract_d perc_tract_c 
 $controls i.city2 
 if incl == 1, cluster(city2);
-testparm i.city2;
-scalar f_p_value = r(F);
-estadd scalar f_p_value = r(F);
 
 eststo reg_all_cov: regress tract_dvoteshare $indep_vars 
 $controls i.city2 
 if incl == 1, cluster(city2);
-testparm i.city2;
-scalar f_p_value = r(F);
-estadd scalar f_p_value = r(F);
 
 eststo reg_all_cov_no_c: regress tract_dvoteshare perc_tract_d perc_tract_d_sq 
 perc_tract_d_cu $controls i.city2 
 if incl == 1, cluster(city2);
-testparm i.city2;
-scalar f_p_value = r(F);
-estadd scalar f_p_value = r(F);
+
 scalar clust = e(N_clust);
 
 estadd local city_controls "Yes": reg_base_c_d reg_base_cube reg_all*; 
@@ -165,9 +151,8 @@ estadd scalar clust: reg_base_c_d reg_base_cube reg_all*;
 esttab reg_* using "$OUTPUT_PATH/main_regressions.tex", 
 	se star(* 0.10 ** 	0.05 *** 0.01) ar2 replace booktabs label
 	drop(*.city2)
-	stats(city_controls cluster_se clust f_p_value N r2_a, label("City fixed effects"
-	"Clustered SE" "Clusters" "F-stat on city fixed effects" "Observations" 
-	"Adjusted R$^2$"));
+	stats(city_controls cluster_se clust N r2_a, label("City fixed effects"
+	"Clustered SE" "Clusters" "Observations" "Adjusted R$^2$"));
 #delimit cr
 
 * Create plots of marginal effects
