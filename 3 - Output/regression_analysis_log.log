@@ -2,7 +2,7 @@
       name:  <unnamed>
        log:  C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/regression_analysis_log.log
   log type:  text
- opened on:   1 Apr 2023, 23:56:51
+ opened on:   3 Apr 2023, 16:34:33
 
 . 
 . cd "$INPUT_PATH/Merge"
@@ -586,6 +586,8 @@ perc_pop_asian |  -.1567524   .0115021   -13.63   0.000    -.1793007   -.1342041
 . label variable perc_tract_c_cu "Grade C cubed"
 
 . 
+. drop perc_tract_c_plus_d
+
 . global indep_vars perc_tract_d* perc_tract_c*
 
 . 
@@ -1124,7 +1126,6 @@ added scalar:
 
 . eststo reg_base_cube: regress tract_dvoteshare $indep_vars i.city2 
 > if incl == 1, cluster(city2);
-note: perc_tract_c_plus_d omitted because of collinearity.
 
 Linear regression                               Number of obs     =      6,026
                                                 F(5, 165)         =          .
@@ -1141,7 +1142,6 @@ Linear regression                               Number of obs     =      6,026
                   perc_tract_d_sq |  -1.228243   .2013706    -6.10   0.000    -1.625838   -.8306476
                   perc_tract_d_cu |   .8027136   .1382262     5.81   0.000     .5297936    1.075634
                      perc_tract_c |   .2050051   .0550567     3.72   0.000     .0962985    .3137116
-              perc_tract_c_plus_d |          0  (omitted)
                   perc_tract_c_sq |  -.6036984   .1195279    -5.05   0.000    -.8396997    -.367697
                   perc_tract_c_cu |   .4283361   .0800539     5.35   0.000      .270274    .5863982
                                   |
@@ -2184,7 +2184,6 @@ added scalar:
 . eststo reg_all_cov: regress tract_dvoteshare $indep_vars 
 > $controls i.city2 
 > if incl == 1, cluster(city2);
-note: perc_tract_c_plus_d omitted because of collinearity.
 
 Linear regression                               Number of obs     =      6,026
                                                 F(14, 165)        =          .
@@ -2201,7 +2200,6 @@ Linear regression                               Number of obs     =      6,026
                   perc_tract_d_sq |  -.2511542   .1073339    -2.34   0.020    -.4630792   -.0392292
                   perc_tract_d_cu |   .1721504   .0716972     2.40   0.017     .0305881    .3137126
                      perc_tract_c |   .1232328   .0370191     3.33   0.001     .0501406     .196325
-              perc_tract_c_plus_d |          0  (omitted)
                   perc_tract_c_sq |  -.2906397   .0684118    -4.25   0.000    -.4257151   -.1555643
                   perc_tract_c_cu |   .1874544   .0438335     4.28   0.000     .1009075    .2740013
                        _yr_median |  -.0000156   .0002639    -0.06   0.953    -.0005367    .0005054
@@ -3930,5 +3928,5 @@ file C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375
       name:  <unnamed>
        log:  C:/Users/lijia/OneDrive - University of Toronto/Documents/School/1-5 ECO375/ECO375 Project//3 - Output/regression_analysis_log.log
   log type:  text
- closed on:   1 Apr 2023, 23:57:38
+ closed on:   3 Apr 2023, 16:35:48
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -58,9 +58,9 @@ gen incl = 0
 replace incl = 1 if tract_dem_total != . & pop_white != . & _yr_median != . & median_age != . & male_female_ratio != . & perc_less_hs_total != . & tract_holc_share > 0.9 & tract_holc_share < 1.05
 
 * Scatter plot
-twoway(scatter tract_dvoteshare perc_tract_d if incl == 1, msize(0.8))
+twoway(scatter tract_dvoteshare perc_tract_d if incl == 1, msize(0.8) xtitle(, size(medlarge)) ytitle(, size(medlarge)))
 graph export "$OUTPUT_PATH\dshare_scatter.png", as(png) replace
-twoway(scatter tract_dvoteshare perc_tract_c if incl == 1, msize(0.8))
+twoway(scatter tract_dvoteshare perc_tract_c if incl == 1, msize(0.8) xtitle(, size(medlarge)) ytitle(, size(medlarge)))
 graph export "$OUTPUT_PATH\cshare_scatter.png", as(png) replace
 
 * Generate summary statistics
@@ -70,6 +70,7 @@ eststo sum_stat_not: estpost sum tract_dvoteshare _yr_median median_age male_fem
 esttab sum_stat sum_stat_not using "$OUTPUT_PATH\sum_stat.tex", ///
 cells("count(pattern(1 1) fmt(%8.0f)) mean(fmt(%8.2g) pattern(1 1)) sd(fmt(%8.2g) pattern(1 1)) min(fmt(%8.2g) pattern(1 1)) max(fmt(%8.2g) pattern(1 1))") /// 
 label mtitles("Census tracts in study" "Census tracts not in study") nodepvar nonumbers booktabs replace
+
 * Regression
 eststo reg_baseline: regress tract_dvoteshare perc_tract_d if incl == 1, robust
 esttab reg_baseline using "$OUTPUT_PATH/base_regression.tex", ///
@@ -103,16 +104,17 @@ perc_pop_asian if incl == 1, robust
 
 * Regression with selected covariates and city fixed effects
 encode city, generate(city2)
-gen perc_tract_d_sq = c.perc_tract_d#c.perc_tract_d
-gen perc_tract_d_cu = c.perc_tract_d#c.perc_tract_d#c.perc_tract_d
+gen perc_tract_d_sq = perc_tract_d^2
+gen perc_tract_d_cu = perc_tract_d^3
 label variable perc_tract_d_sq "Grade D squared"
 label variable perc_tract_d_cu "Grade D cubed"
 
-gen perc_tract_c_sq = c.perc_tract_c#c.perc_tract_c
-gen perc_tract_c_cu = c.perc_tract_c#c.perc_tract_c#c.perc_tract_c
+gen perc_tract_c_sq = perc_tract_c^2
+gen perc_tract_c_cu = perc_tract_c^3
 label variable perc_tract_c_sq "Grade C squared"
 label variable perc_tract_c_cu "Grade C cubed"
 
+drop perc_tract_c_plus_d
 global indep_vars perc_tract_d* perc_tract_c*
 
 global controls _yr_median-male_female_ratio perc_hs_total-perc_pop_asian
@@ -175,11 +177,11 @@ c.perc_tract_c c.perc_tract_c#c.perc_tract_c c.perc_tract_c#c.perc_tract_c#c.per
 regress tract_dvoteshare $indep_vars $controls ///
 i.city2 if incl == 1, cluster(city2)
 margins, at(perc_tract_d=(0(0.01)1))
-marginsplot, recast(line) recastci(rarea) ytitle(Predicted Dem share)
+marginsplot, recast(line) recastci(rarea) ytitle(Predicted Dem share, size(medlarge)) xtitle(, size(medlarge))
 graph export "$OUTPUT_PATH\dshare_marginplot.png", as(png) replace
 
 margins, at(perc_tract_c=(0(0.01)1))
-marginsplot, recast(line) recastci(rarea) ytitle(Predicted value of Dem share)
+marginsplot, recast(line) recastci(rarea) ytitle(Predicted value of Dem share, size(medlarge)) xtitle(, size(medlarge))
 graph export "$OUTPUT_PATH\cshare_marginplot.png", as(png) replace
 
 log close

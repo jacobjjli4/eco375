@@ -1,16 +1,22 @@
-\LoadClass[11pt]{article}
+\LoadClass[12pt]{article}
 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{eco_375_paper}
 
+% for page setup
 \RequirePackage[letterpaper, margin=1in]{geometry}
-\RequirePackage{booktabs} % for tables
-\RequirePackage{graphicx} % for graphics
-\RequirePackage{tgadventor} % sans-serif font for headings
-\RequirePackage{times} % serif font for body text
-\RequirePackage{longtable}
-\RequirePackage{amsmath} % for equations
 \RequirePackage{lscape}
+
+% for math
+\RequirePackage{amsmath} % for equations
+\RequirePackage{bm} % for bold math
+
+% for tables
+\RequirePackage{longtable}
+\RequirePackage{booktabs}
+
+% for figures
+\RequirePackage{graphicx} % for graphics
 \RequirePackage{caption}
 \RequirePackage{subcaption} % for side-by-side figures
 
@@ -25,10 +31,13 @@
 \onehalfspacing
 \setlength{\parindent}{20pt}
 \usepackage{indentfirst}
+\RequirePackage{times} % serif font for body text
 	
+% heading formatting
 \RequirePackage{titlesec}
-\titleformat*{\section}{\Large\sffamily}
-\titlespacing\section{0pt}{6pt plus 4pt minus 2pt}{6pt plus 2pt minus 2pt}
+\RequirePackage{tgadventor} % sans-serif font for headings
+\titleformat*{\section}{\Large\sffamily\bfseries}
+\titlespacing\section{0pt}{6pt plus 2pt minus 2pt}{6pt plus 2pt minus 2pt}
 
 \graphicspath{{\opath/}}	
 
@@ -42,8 +51,8 @@
 	\begin{#1}
 	\centering
 	\input{\opath/#2}
-	\label{table:#3}
 	\caption{#4}
+	\label{table:#3}
 	\end{#1}
 	\end{table}
 }
