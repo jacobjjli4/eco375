@@ -6,6 +6,7 @@
 % for page setup
 \RequirePackage[letterpaper, margin=1in]{geometry}
 \RequirePackage{lscape}
+\RequirePackage{float}
 
 % for math
 \RequirePackage{amsmath} % for equations
@@ -19,6 +20,7 @@
 \RequirePackage{graphicx} % for graphics
 \RequirePackage{caption}
 \RequirePackage{subcaption} % for side-by-side figures
+\captionsetup{belowskip=0pt}
 
 % citations
 \usepackage[backend=biber,
@@ -37,7 +39,7 @@
 \RequirePackage{titlesec}
 \RequirePackage{tgadventor} % sans-serif font for headings
 \titleformat*{\section}{\Large\sffamily\bfseries}
-\titlespacing\section{0pt}{6pt plus 2pt minus 2pt}{6pt plus 2pt minus 2pt}
+\titlespacing\section{0pt}{6pt plus 2pt minus 2pt}{0pt plus 2pt minus 2pt}
 
 \graphicspath{{\opath/}}	
 
@@ -47,7 +49,7 @@
 %\newcommand{\opath}{}
 
 \newcommand{\datatable}[4][normalsize]{ % for regression output
-	\begin{table}[h]
+	\begin{table}[H]
 	\begin{#1}
 	\centering
 	\input{\opath/#2}
@@ -58,7 +60,7 @@
 }
 
 \newcommand{\newfigure}[4][0.8]{
-	\begin{figure}[h]
+	\begin{figure}[H]
 	\centering
 	\includegraphics[width=#1\linewidth]{#2}
 	\caption{#4}
@@ -67,7 +69,7 @@
 }
 
 \newcommand{\newsubfig}[5][1]{
-	\begin{figure}[h]
+	\begin{figure}[H]
 		\centering
 		\begin{subfigure}{0.5\linewidth}
 		  \centering

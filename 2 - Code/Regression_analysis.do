@@ -122,9 +122,7 @@ global controls _yr_median-male_female_ratio perc_hs_total-perc_pop_asian
 #delimit ;
 eststo reg_base_c_d: regress tract_dvoteshare perc_tract_d perc_tract_c
 i.city2 if incl == 1, cluster(city2);
-
-eststo reg_base_cube: regress tract_dvoteshare $indep_vars i.city2 
-if incl == 1, cluster(city2);
+testparm i.city2;
 
 eststo reg_all_cov_lin: regress tract_dvoteshare perc_tract_d perc_tract_c 
 $controls i.city2 
@@ -140,9 +138,9 @@ if incl == 1, cluster(city2);
 
 scalar clust = e(N_clust);
 
-estadd local city_controls "Yes": reg_base_c_d reg_base_cube reg_all*; 
-estadd local cluster_se "City": reg_base_c_d reg_base_cube reg_all*;
-estadd scalar clust: reg_base_c_d reg_base_cube reg_all*;
+estadd local city_controls "Yes": reg_base_c_d reg_all*; 
+estadd local cluster_se "City": reg_base_c_d reg_all*;
+estadd scalar clust: reg_base_c_d reg_all*;
 #delimit cr
 
 * Export regressions
